@@ -61,7 +61,7 @@ class Byte:
 
 
 class Memory(dict):
-    def __init__(self, memory_size=4096, starting_address="0x0000", *args, **kwargs) -> None:
+    def __init__(self, memory_size=65535, starting_address="0x0000", *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._starting_address = starting_address
         self._memory_size = memory_size
@@ -97,40 +97,6 @@ class Memory(dict):
         return super().__setitem__(__k, Byte(value))
 
     pass
-
-
-# class RegisterPair:
-#     def __init__(self, reg_1, reg_2, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         super().__setitem__(reg_1, Byte())
-#         super().__setitem__(reg_2, Byte())
-#         self._reg_1 = reg_1
-#         self._reg_2 = reg_2
-#         self._registers = [reg_1, reg_2]
-#         self._bytes = 2
-#         return
-
-#     def __repr__(self):
-#         return f"{self[self._reg_1]} {self[self._reg_2]}"
-
-#     def __setitem__(self, __k, v) -> None:
-#         if __k not in self:
-#             raise KeyError(f"Register '{__k}' not found!")
-#         return super().__setitem__(__k, v)
-
-#     def __getitem__(self, __k) -> Byte:
-#         if __k not in self:
-#             raise KeyError(f"Register '{__k}' not found!")
-#         return super().__getitem__(__k)
-
-#     def read(self, addr) -> Byte:
-#         return self.__getitem__(str(addr).upper())
-
-#     def read_pair(self) -> str:
-#         bin1 = format(int(str(self[self._registers[0]]), 16), f"0{self._bytes * 4}b")
-#         bin2 = format(int(str(self[self._registers[1]]), 16), f"0{self._bytes * 4}b")
-#         bin_total = "".join(["0b", bin1, bin2])
-#         return f'0x{format(int(bin_total, 2), f"0{self._bytes * 2}x")}'
 
 
 class RegisterPair:
@@ -190,6 +156,10 @@ class Registers:
         self.HL = RegisterPair("H", "L")
         self.SP = RegisterPair("S", "P")
         self.PC = Byte(_bytes=2)
+        setattr(self.M.__func__, "read", lambda addr: self.HL.read_pair())
+        return
+
+    def M(self):
         return
 
     def inspect(self):

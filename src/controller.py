@@ -30,23 +30,34 @@ class Controller:
         command.strip()
         if not command:
             return None, None
-        command = re.split(", |\ ", command)
-        opcode = command[0]
-        args = command[1:]
+        command_proc = re.split(",|\ ", command)
+        opcode = command_proc[0]
+        args = command_proc[1:]
+        if "" in args:
+            args.remove("")
+        if f"{self.instruct_set._jump_flag}:" in opcode:
+            print(f"Jump stopped {args}")
+            command = command.replace(f"{self.instruct_set._jump_flag}: ", "")
+            print(command)
+            self.instruct_set._jump_flag = False
+            return self._parser(command)
         return opcode, args
 
     def _call(self, opcode, *args, **kwargs) -> None:
-        if func := self.lookup.get(opcode):
+        if func := self.lookup.get(opcode.upper()):
             print(args)
             self.op.opcode_fetch(opcode)
             return func(*args, **kwargs)
         raise OPCODENotFound()
 
     def parse_and_call(self, command):
-        opcode, args = self._parser(command.upper())
+        opcode, args = self._parser(command)
         print(opcode)
         if not opcode:
             raise OPCODENotFound()
-        self._call(opcode, *args)
+        if not self.instruct_set._jump_flag:
+            return self._call(opcode, *args)
+        else:
+            print(f"Jump encountered {self.instruct_set._jump_flag}")
 
     pass
