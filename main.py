@@ -63,6 +63,7 @@ while True:
                 console.print(controller.op.inspect())
                 continue
             else:
+                # ! REMOVE THIS LATER
                 console.print(eval(command[1:]))
         else:
             try:
