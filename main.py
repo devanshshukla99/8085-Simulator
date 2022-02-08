@@ -80,4 +80,3 @@ while True:
 
     except Exception:
         console.print_exception(extra_lines=2)
-

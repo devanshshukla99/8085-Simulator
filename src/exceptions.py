@@ -1,7 +1,7 @@
-
 class SyntaxError(Exception):
     def __init__(self, msg="invalid syntax") -> None:
         super().__init__(msg)
+
 
 class OPCODENotFound(Exception):
     def __init__(self, msg="invalid opcode") -> None:

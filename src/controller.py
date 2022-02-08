@@ -1,4 +1,3 @@
-from pickletools import opcodes
 import re
 from src.instruction_set import Instructions
 from src.operations import Operations
@@ -45,4 +44,3 @@ class Controller:
         self._call(opcode, *args)
 
     pass
-

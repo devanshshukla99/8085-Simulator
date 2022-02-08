@@ -1,7 +1,6 @@
-from pickle import LIST
-from src.exceptions import SyntaxError
-from src.operations import Flags
+from src.flags import flags
 from src.util import decompose_byte
+from src.exceptions import SyntaxError
 
 
 class Instructions:
@@ -24,13 +23,13 @@ class Instructions:
         _added_d1_d2_1 = int(d1, 16) + int(d2, 16)
         if _added_d1_d2_1 >= 16:
             _added_d1_d2_1 -= 16
-            self.op.flags.AC = True
+            flags.AC = True
 
         d1, d2 = _carry
         _added_d1_d2_2 = int(d1, 16) + int(d2, 16)
         if _added_d1_d2_2 >= 16:
             _added_d1_d2_2 -= 16
-            self.op.flags.C = True
+            flags.C = True
 
         return format(_added_d1_d2_2 * 16 + _added_d1_d2_1, "#04x")
 

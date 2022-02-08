@@ -1,10 +1,10 @@
-from src.memory import Memory, Registers, Byte, Flags
+from src.memory import Memory, Registers, Byte
+
 
 class Operations:
     def __init__(self) -> None:
         self.memory = Memory(4096, "0x0000")
         self.registers = Registers()
-        self.flags = Flags()
 
         self._registers_list = {
             "A": self.registers.A,
