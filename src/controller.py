@@ -1,4 +1,5 @@
 import re
+import inspect
 from src.instruction_set import Instructions
 from src.operations import Operations
 from src.exceptions import OPCODENotFound
@@ -8,10 +9,15 @@ class Controller:
     def __init__(self) -> None:
         self.op = Operations()
         self.instruct_set = Instructions(self.op)
+        # self.lookup = {
+        #     "MVI": self.instruct_set.mvi,
+        #     "LXI": self.instruct_set.lxi,
+        #     "ADD": self.instruct_set.add,
+        # }
         self.lookup = {
-            "MVI": self.instruct_set.mvi,
-            "LXI": self.instruct_set.lxi,
-            "ADD": self.instruct_set.add,
+            name.upper(): call
+            for name, call in inspect.getmembers(self.instruct_set, inspect.ismethod)
+            if "_" not in name
         }
 
     def __repr__(self):
@@ -30,14 +36,14 @@ class Controller:
         return opcode, args
 
     def _call(self, opcode, *args, **kwargs) -> None:
-        if func := self.lookup.get(opcode.upper()):
+        if func := self.lookup.get(opcode):
             print(args)
             self.op.opcode_fetch(opcode)
             return func(*args, **kwargs)
         raise OPCODENotFound()
 
     def parse_and_call(self, command):
-        opcode, args = self._parser(command)
+        opcode, args = self._parser(command.upper())
         print(opcode)
         if not opcode:
             raise OPCODENotFound()

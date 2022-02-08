@@ -45,38 +45,42 @@ def make_layout():
     return layout
 
 
-console = Console()
-# layout = make_layout()
-prompt = Prompt()
-# with Live(prompt, console=console) as live:
-controller = Controller()
+def main():
+    console = Console()
+    # layout = make_layout()
+    prompt = Prompt()
+    # with Live(prompt, console=console) as live:
+    controller = Controller()
 
-while True:
-    try:
-        command = prompt.ask("[bold][red]Input>[/]")
-        if not command:
-            continue
-        elif command == "quit" or command == "exit":
-            exit(-1)
-        elif command[0] == "/":
-            if command == "/inspect":
-                console.print(controller.op.inspect())
+    while True:
+        try:
+            command = prompt.ask("[bold][red]Input>[/]")
+            if not command:
                 continue
+            elif command == "quit" or command == "exit":
+                exit(-1)
+            elif command[0] == "/":
+                if command == "/inspect":
+                    console.print(controller.op.inspect())
+                    continue
+                else:
+                    # ! REMOVE THIS LATER
+                    console.print(eval(command[1:]))
             else:
-                # ! REMOVE THIS LATER
-                console.print(eval(command[1:]))
-        else:
-            try:
-                controller.parse_and_call(command)
-            except OPCODENotFound:
-                console.print_exception(extra_lines=2)
-    except KeyboardInterrupt:
-        console.log("[red]Exiting...[/]")
-        exit(-1)
+                try:
+                    controller.parse_and_call(command)
+                except OPCODENotFound:
+                    console.print_exception(extra_lines=2)
+        except KeyboardInterrupt:
+            print("")
 
-    except EOFError:
-        console.log("[red]Exiting...[/]")
-        exit(-1)
+        except EOFError:
+            console.log("[red]Exiting...[/]")
+            exit(-1)
 
-    except Exception:
-        console.print_exception(extra_lines=2)
+        except Exception:
+            console.print_exception(extra_lines=2)
+
+
+if __name__ == "__main__":
+    main()

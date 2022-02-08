@@ -1,6 +1,5 @@
 from src.flags import flags
-from src.util import decompose_byte
-from src.exceptions import SyntaxError
+from src.util import decompose_byte, construct_hex
 
 
 class Instructions:
@@ -9,14 +8,18 @@ class Instructions:
         self._next_link = {"A": "PSW", "B": "C", "D": "E", "H": "L", "S": "P"}
         pass
 
-    def mvi(self, to_addr, from_addr) -> None:
+    def mvi(self, addr, data) -> None:
+        self.op.memory_write(addr, data)
+        return
+
+    def mov(self, to_addr, from_addr) -> None:
         data = self.op.memory_read(from_addr)
         self.op.memory_write(to_addr, data)
         return
 
     def _adder(self, data_1, data_2):
-        decomposed_data_1 = decompose_byte(data_1, mem_size=4)
-        decomposed_data_2 = decompose_byte(data_2, mem_size=4)
+        decomposed_data_1 = decompose_byte(data_1, _bytes=1, nibble=True)
+        decomposed_data_2 = decompose_byte(data_2, _bytes=1, nibble=True)
         _carry, _aux_carry = zip(decomposed_data_1, decomposed_data_2)
 
         d1, d2 = _aux_carry
@@ -27,6 +30,8 @@ class Instructions:
 
         d1, d2 = _carry
         _added_d1_d2_2 = int(d1, 16) + int(d2, 16)
+        if flags.AC:
+            _added_d1_d2_2 += 1
         if _added_d1_d2_2 >= 16:
             _added_d1_d2_2 -= 16
             flags.C = True
@@ -43,14 +48,14 @@ class Instructions:
         self.op.memory_write(to_addr, data)
         return
 
-    def lxi(self, to_addr, data) -> None:
-        data_to_write = decompose_byte(data)
-        if not data_to_write:
-            raise ValueError(f"byte by byte failed {data_to_write}")
-        self.op.memory_write(to_addr, data_to_write[0])
-        if nxt_to_addr := self._next_link.get(to_addr, None):
-            self.op.memory_write(nxt_to_addr, data_to_write[1])
-            return
-        raise SyntaxError(msg="next link not found; check the instruction")
+    def lxi(self, addr, data) -> None:
+        self.op.register_pair_write(addr, data)
+        return True
+
+    def inx(self, addr) -> None:
+        data = self.op.register_pair_read(addr)
+        data_to_write = format(int(data, 16) + 1, "#06x")
+        self.op.register_pair_write(addr, data_to_write)
+        return True
 
     pass

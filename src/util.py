@@ -1,11 +1,22 @@
-def decompose_byte(data, _bytes=2, mem_size=8):
-    len_bin = _bytes * mem_size
-    binary_data = format(int(str(data), 16), "b")
-    if len(binary_data) != len_bin:
-        pad_required = len_bin - len(binary_data)
-        binary_data = "0" * pad_required + binary_data
-    return [hex(int(binary_data[mem_size * x : mem_size * (x + 1)], 2)) for x in range(0, _bytes)]
+def decompose_byte(data, _bytes=2, nibble=False):
+    mem_size = 8
+    if nibble:
+        mem_size = 4
+    binary_data = format(int(str(data), 16), f"0{_bytes*8}b")
+    return [
+        format(int(binary_data[mem_size * x : mem_size * (x + 1)], 2), f"#0{int(mem_size/2)}x")
+        for x in range(0, int(len(binary_data) / mem_size))
+    ]
 
 
 def construct_byte(data):
     pass
+
+
+def construct_hex(hex1, hex2, _bytes=2):
+    bin1 = format(int(str(hex1), 16), f"0{_bytes * 4}b")
+    bin2 = format(int(str(hex2), 16), f"0{_bytes * 4}b")
+    print(bin1)
+    print(bin2)
+    bin_total = "".join(["0b", bin1, bin2])
+    return f'0x{format(int(bin_total, 2), f"0{_bytes * 2}x")}'
