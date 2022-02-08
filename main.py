@@ -45,6 +45,44 @@ def make_layout():
     return layout
 
 
+def run(filename):
+    console = Console()
+    controller = Controller()
+    coms = None
+    with open(filename, "r") as f:
+        coms = f.read()
+    coms = coms.split("\n")
+    try:
+        for command in coms:
+            console.log(command)
+            if not command:
+                continue
+            elif command == "quit" or command == "exit":
+                exit(-1)
+            elif command[0] == "/":
+                if command == "/inspect":
+                    console.print(controller.op.inspect())
+                    continue
+                else:
+                    # ! REMOVE THIS LATER
+                    console.print(eval(command[1:]))
+            else:
+                try:
+                    controller.parse_and_call(command)
+                except OPCODENotFound:
+                    console.print_exception(extra_lines=2)
+    except KeyboardInterrupt:
+        print("")
+
+    except EOFError:
+        console.log("[red]Exiting...[/]")
+        exit(-1)
+
+    except Exception:
+        console.print_exception(extra_lines=2)
+    return
+
+
 def main():
     console = Console()
     # layout = make_layout()
