@@ -1,4 +1,9 @@
-def decompose_byte(data, _bytes=2, nibble=False):
+def sanatize_hex(data):
+    return data.replace("0x", "").replace("0X", "")
+
+
+def decompose_byte(data, nibble=False):
+    _bytes = int(len(sanatize_hex(data)) / 2)
     mem_size = 8
     if nibble:
         mem_size = 4
@@ -9,8 +14,9 @@ def decompose_byte(data, _bytes=2, nibble=False):
     ]
 
 
-def construct_byte(data):
-    pass
+def get_bytes(data):
+    data = str(data)
+    return int(len(sanatize_hex(data)) / 2)
 
 
 def construct_hex(hex1, hex2, _bytes=2):

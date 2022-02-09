@@ -9,6 +9,9 @@ class Instructions:
         self._jump_flag = False
         pass
 
+    def _set_opcode(self, func, opcodes):
+        return setattr(func.__func__, "opcodes", opcodes)
+
     def mvi(self, addr, data) -> bool:
         self.op.memory_write(addr, data)
         return True
@@ -18,9 +21,15 @@ class Instructions:
         self.op.memory_write(to_addr, data)
         return True
 
+    def _next_addr(self, addr):
+        return format(int(str(addr), 16) + 1, "#06x")
+
     def _adder(self, data_1, data_2) -> str:
-        decomposed_data_1 = decompose_byte(data_1, _bytes=1, nibble=True)
-        decomposed_data_2 = decompose_byte(data_2, _bytes=1, nibble=True)
+        # decomposed_data_1 = decompose_byte(data_1, _bytes=1, nibble=True)
+        # decomposed_data_2 = decompose_byte(data_2, _bytes=1, nibble=True)
+
+        decomposed_data_1 = decompose_byte(data_1, nibble=True)
+        decomposed_data_2 = decompose_byte(data_2, nibble=True)
         _carry, _aux_carry = zip(decomposed_data_1, decomposed_data_2)
 
         d1, d2 = _aux_carry
@@ -38,6 +47,15 @@ class Instructions:
             flags.C = True
 
         return format(_added_d1_d2_2 * 16 + _added_d1_d2_1, "#04x")
+
+    def db(self, *args):
+        """
+        stores at current location
+        """
+        print(f"db {args}")
+        for x in args:
+            self._write_next_PC(x)
+        return True
 
     def add(self, to_addr, from_addr=None) -> bool:
         if not from_addr:

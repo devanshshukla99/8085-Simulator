@@ -5,6 +5,7 @@ from src.exceptions import ValueErrorHexRequired, InvalidMemoryAddress, MemoryLi
 
 class Byte:
     def __init__(self, data=None, _bytes=1) -> None:
+        self._bytes = _bytes
         self._mem_limit = "".join(["0x", "FF" * _bytes])
         self.data = "".join(["0x", "00" * _bytes])
         if data:
@@ -22,6 +23,21 @@ class Byte:
 
     def __call__(self, value):
         self.data = value
+
+    def __next__(self):
+        self.data = format(int(str(self.data), 16) + 1, f"#0{2 + self._bytes*2}x")
+        return True
+
+    def _next_addr(self):
+        data = format(int(str(self.data), 16) + 1, "#06x")
+        self.write(data)
+        return True
+
+    def lower(self):
+        return self._data.lower()
+
+    def upper(self):
+        return self._data.upper()
 
     def read(self, *args):
         return self.data
@@ -43,7 +59,6 @@ class Byte:
         return True
 
     def _verify(self, value):
-        print(f"check this {value=}")
         if self._verify_hex(value):
             if self._verify_limit(value):
                 return True
@@ -175,15 +190,3 @@ class Registers:
             PC = {self.PC}
             """
         )
-        # return textwrap.dedent(
-        #     f"""
-        #     Registers
-        #     ---------
-        #     A/PSW = {self.A} {self.PSW}
-        #     BC = {self.B} {self.C}
-        #     DE = {self.D} {self.E}
-        #     HL = {self.H} {self.L}
-        #     SP = {self.S} {self.P}
-        #     PC = {self.PC}
-        #     """
-        # )
