@@ -1,5 +1,5 @@
 import re
-from src.memory import Memory, Registers, Byte
+from src.memory import Memory, Registers, Byte, SuperMemory
 from src.flags import flags
 from src.exceptions import OPCODENotFound, SyntaxError
 from src.util import get_bytes, decompose_byte
@@ -7,28 +7,27 @@ from src.util import get_bytes, decompose_byte
 
 class Operations:
     def __init__(self) -> None:
-        self.memory = Memory(65535, "0x0000")
-        self.registers = Registers()
-        self.registers.PC("0x0800")
-        self._next_link = {"B": "C", "D": "E", "H": "L", "S": "P"}
+        self.super_memory = SuperMemory()
+        self.memory = self.super_memory.memory
+        self.super_memory.PC("0x0800")
         self._registers_list = {
-            "A": self.registers.A,
-            "PSW": self.registers.PSW,
-            "B": self.registers.BC,
-            "C": self.registers.BC,
-            "D": self.registers.DE,
-            "E": self.registers.DE,
-            "H": self.registers.HL,
-            "L": self.registers.HL,
-            "S": self.registers.SP,
-            "P": self.registers.SP,
-            "PC": self.registers.PC,
-            "M": self.registers.M,
+            "A": self.super_memory.A,
+            "PSW": self.super_memory.PSW,
+            "B": self.super_memory.BC,
+            "C": self.super_memory.BC,
+            "D": self.super_memory.DE,
+            "E": self.super_memory.DE,
+            "H": self.super_memory.HL,
+            "L": self.super_memory.HL,
+            "S": self.super_memory.SP,
+            "P": self.super_memory.SP,
+            "PC": self.super_memory.PC,
+            "M": self.super_memory.M,
         }
         pass
 
     def inspect(self):
-        return "\n\n".join([self.registers.inspect(), flags.inspect(), str(self.memory.sort())])
+        return "\n\n".join([flags.inspect(), self.super_memory.inspect()])
 
     def _parse_addr(self, addr):
         addr = addr.upper()
@@ -41,10 +40,8 @@ class Operations:
             return _register
         raise SyntaxError(msg="next link not found; check the instruction")
 
-    def _write_next_PC(self, data):
-        self.memory[str(self.registers.PC)] = data
-        next(self.registers.PC)
-        return True
+    def _write_next_PC(self, *args, **kwargs):
+        return self.super_memory._write_and_update_pc(*args, **kwargs)
 
     def opcode_fetch(self, func, command, *args, **kwargs) -> None:
         print(f"opcode fetch -- {command}")
@@ -61,14 +58,6 @@ class Operations:
             return True
         raise OPCODENotFound
 
-    def memory_read(self, addr) -> Byte:
-        print(f"memory read {addr}")
-        if _parsed_addr := self._parse_addr(addr):
-            if addr == "M":
-                return self.memory.get(_parsed_addr.read(addr))
-            return _parsed_addr.read(addr)
-        return self.memory.get(addr)
-
     def _write_opcode(self, data) -> bool:
         data_bytes = decompose_byte(data)
         for _byte in data_bytes[::-1]:
@@ -76,25 +65,36 @@ class Operations:
             self._write_next_PC(_byte)
         return True
 
-    def memory_write(self, addr, data) -> bool:
-        print(f"memory write {addr}|{data}")
-        self._write_opcode(data)
+    def memory_read(self, addr) -> Byte:
+        print(f"memory read {addr}")
         if _parsed_addr := self._parse_addr(addr):
-            if addr == "M":
-                self.memory_write(self.memory_read("M"), data)
-                return True
+            return _parsed_addr.read(addr)
+        data = self.memory.get(addr)
+        # self._write_opcode(data)
+        return data
+
+    def memory_write(self, addr, data, log=True) -> bool:
+        print(f"memory write {addr}|{data}")
+        if _parsed_addr := self._parse_addr(addr):
+            if log:
+                self._write_opcode(data)
             return _parsed_addr.write(data, addr)
+        if log:
+            self._write_opcode(addr)
         self.memory[addr] = data
         return True
 
     def register_pair_read(self, addr) -> Byte:
         print(f"register pair read {addr}")
         _register = self._get_register(addr)
-        return _register.read_pair()
+        data = _register.read_pair()
+        # self._write_opcode(data)
+        return data
 
-    def register_pair_write(self, addr, data) -> bool:
+    def register_pair_write(self, addr, data, log=True) -> bool:
         print(f"register pair write {addr}|{data}")
-        self._write_opcode(data)
+        if log:
+            self._write_opcode(data)
         _register = self._get_register(addr)
         _register.write_pair(data)
         return True

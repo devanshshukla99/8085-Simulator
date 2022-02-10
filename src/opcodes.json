@@ -83,6 +83,12 @@
         "MOV M H": "0x74",
         "MOV M L": "0x75"
     },
+    "DAD": {
+        "DAD B": "0x09",
+        "DAD D": "0x19",
+        "DAD H": "0x29",
+        "DAD SP": "0x39"
+    },
     "LXI": {
         "LXI B": "0x01",
         "LXI D": "0x11",
@@ -104,6 +110,12 @@
         "INX D": "0x13",
         "INX H": "0x23",
         "INX SP": "0x33"
+    },
+    "JNC": {
+        "JNC": "0xD2"
+    },
+    "STA": {
+        "STA": "0x32"
     },
     "LHLD": {
         "LHLD": "0x2A"

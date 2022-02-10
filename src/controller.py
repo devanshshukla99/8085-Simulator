@@ -2,13 +2,18 @@ import re
 import json
 import inspect
 import warnings
+from rich.console import Console
+
 from src.instruction_set import Instructions
 from src.operations import Operations
 from src.exceptions import OPCODENotFound
 
 
 class Controller:
-    def __init__(self) -> None:
+    def __init__(self, console=None) -> None:
+        self.console = console
+        if not console:
+            self.console = Console()
         self.op = Operations()
         self.instruct_set = Instructions(self.op)
         self.lookup = {
@@ -35,7 +40,7 @@ class Controller:
         return True
 
     def inspect(self):
-        return self.op.inspect()
+        return self.console.print(self.__repr__())
 
     def _parser(self, command):
         command.strip()
@@ -73,5 +78,10 @@ class Controller:
             return self._call(command, opcode, *args)
         else:
             print(f"Jump encountered {self.instruct_set._jump_flag}")
+
+    def parse_all(self, commands):
+        for command in commands:
+            self.parse_and_call(command)
+        return
 
     pass

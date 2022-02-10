@@ -87,36 +87,32 @@ class Memory(dict):
         self._memory_limit = hex(int(starting_address, 16) + memory_size)
         self._default_mem = Byte("0x00")
 
-    def _verify_hex(self, value):
-        if type(value) is Byte:
-            return True
-        if not re.fullmatch("^0[x|X][0-9a-fA-F]+", value):
-            raise ValueErrorHexRequired()
-        return True
-
-    def _verify_address(self, value):
-        if not self._verify_hex(value):
-            return False
+    def _verify_sanatize(self, value):
+        if not re.fullmatch("^0[x|X][0-9a-fA-F]+", str(value)):
+            raise InvalidMemoryAddress()
         if int(str(value), 16) > int(self._memory_limit, 16):
             raise MemoryLimitExceeded()
-        return True
+        return format(int(str(value), 16), "#06x")
 
-    def __getitem__(self, __k):
-        if __k not in self:
-            if not self._verify_address(__k):
-                raise InvalidMemoryAddress()
-            self.__setitem__(__k, self._default_mem)
+    def __getitem__(self, addr):
+        addr = self._verify_sanatize(addr)
+        if addr not in self:
+            self.__setitem__(addr, self._default_mem)
             return self._default_mem
-        return super().__getitem__(__k)
+        return super().__getitem__(addr)
 
-    def __setitem__(self, __k, value) -> None:
-        return super().__setitem__(__k, Byte(value))
+    def __setitem__(self, addr, value) -> None:
+        addr = self._verify_sanatize(addr)
+        return super().__setitem__(addr, Byte(value))
 
     def sort(self):
         return dict(sorted(self.items(), key=lambda x: int(str(x[0]), 16)))
 
-    def get(self, __k):
-        return self.__getitem__(__k)
+    def read(self, *args, **kwargs):
+        return self.__getitem__(*args, **kwargs)
+
+    def write(self, *args, **kwargs):
+        return self.__setitem__(*args, **kwargs)
 
     pass
 
@@ -197,3 +193,45 @@ class Registers:
             PC = {self.PC}
             """
         )
+    pass
+
+
+class SuperMemory:
+    def __init__(self) -> None:
+        self.memory = Memory(65535, "0x0000")
+
+        self.A = Byte()
+        self.PSW = Byte()
+        self.BC = RegisterPair("B", "C")
+        self.DE = RegisterPair("D", "E")
+        self.HL = RegisterPair("H", "L")
+        self.SP = RegisterPair("S", "P")
+        self.PC = Byte(_bytes=2)
+        setattr(self.M.__func__, "read", lambda *args: self.memory[self.HL.read_pair()])
+        setattr(self.M.__func__, "write", lambda data, *args: self.memory.write(self.HL.read_pair(), data))
+        pass
+
+    def M(self):
+        return
+
+    def _reg_inspect(self):
+        return textwrap.dedent(
+            f"""
+            Registers
+            ---------
+            A/PSW = {self.A} {self.PSW}
+            BC = {self.BC}
+            DE = {self.DE}
+            HL = {self.HL}
+            SP = {self.SP}
+            PC = {self.PC}
+            """
+        )
+
+    def inspect(self):
+        return "\n\n".join([self._reg_inspect(), str(self.memory.sort())])
+
+    def _write_and_update_pc(self, data):
+        self.memory[str(self.PC)] = data
+        next(self.PC)
+        return True

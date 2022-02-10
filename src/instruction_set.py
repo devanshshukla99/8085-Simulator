@@ -18,7 +18,7 @@ class Instructions:
 
     def mov(self, to_addr, from_addr) -> bool:
         data = self.op.memory_read(from_addr)
-        self.op.memory_write(to_addr, data)
+        self.op.memory_write(to_addr, data, log=False)
         return True
 
     def _next_addr(self, addr):
@@ -64,7 +64,7 @@ class Instructions:
         data_1 = self.op.memory_read(from_addr)
         data_2 = self.op.memory_read(to_addr)
         data = self._adder(data_1, data_2)
-        self.op.memory_write(to_addr, data)
+        self.op.memory_write(to_addr, data, log=False)
         return True
 
     def lxi(self, addr, data) -> bool:
@@ -74,7 +74,7 @@ class Instructions:
     def inx(self, addr) -> bool:
         data = self.op.register_pair_read(addr)
         data_to_write = format(int(data, 16) + 1, "#06x")
-        self.op.register_pair_write(addr, data_to_write)
+        self.op.register_pair_write(addr, data_to_write, log=False)
         return True
 
     def lhld(self, addr) -> bool:

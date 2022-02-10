@@ -60,7 +60,7 @@ def run(filename):
             elif command == "quit" or command == "exit":
                 exit(-1)
             elif command[0] == "/":
-                if command == "/inspect":
+                if command == "/c" or command == "/inspect":
                     console.print(controller.op.inspect())
                     continue
                 else:
@@ -98,7 +98,7 @@ def main():
             elif command == "quit" or command == "exit":
                 exit(-1)
             elif command[0] == "/":
-                if command == "/inspect":
+                if command == "/c" or command == "/inspect":
                     console.print(controller.op.inspect())
                     continue
                 else:
