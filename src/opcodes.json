@@ -1,4 +1,13 @@
 {
+    "ADD": {
+        "ADD B": "0x80",
+        "ADD C": "0x81",
+        "ADD D": "0x82",
+        "ADD E": "0x83",
+        "ADD H": "0x84",
+        "ADD L": "0x85",
+        "ADD M": "0x86"
+    },
     "MVI": {
         "MVI A": "0x3E",
         "MVI B": "0x06",

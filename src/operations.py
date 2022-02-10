@@ -28,7 +28,7 @@ class Operations:
         pass
 
     def inspect(self):
-        return "\n\n".join([self.registers.inspect(), flags.inspect(), str(self.memory)])
+        return "\n\n".join([self.registers.inspect(), flags.inspect(), str(self.memory.sort())])
 
     def _parse_addr(self, addr):
         addr = addr.upper()
@@ -49,7 +49,8 @@ class Operations:
     def opcode_fetch(self, func, command, *args, **kwargs) -> None:
         print(f"opcode fetch -- {command}")
         command = command.replace(",", "")
-        command = command.replace(re.search("0x[0-9a-fA-Z]+", command).group(), "")
+        if _hex_in_com := re.search("0x[0-9a-fA-Z]+", command):
+            command = command.replace(_hex_in_com.group(), "")
         command = command.strip()
         regex = re.compile(command.upper())
         _search_opcode = list(filter(regex.fullmatch, list(func.opcodes.keys())))

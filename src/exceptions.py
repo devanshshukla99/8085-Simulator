@@ -19,5 +19,5 @@ class InvalidMemoryAddress(Exception):
 
 
 class ValueErrorHexRequired(ValueError):
-    def __init__(self, msg="invalid valid; only hex supported!") -> None:
-        super().__init__(msg)
+    def __init__(self, value, msg="invalid valid; only hex supported!") -> None:
+        super().__init__(f"{msg}({value})")

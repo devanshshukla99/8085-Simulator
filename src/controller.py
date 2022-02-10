@@ -26,9 +26,7 @@ class Controller:
         opcodes = None
         with open("src/opcodes.json", "r") as f:
             opcodes = json.load(f)
-        print(opcodes)
         opcode_keys = list(opcodes.keys())
-        print(opcode_keys)
         for key in opcode_keys:
             if callback := self.lookup.get(key, None):
                 self.instruct_set._set_opcode(callback, opcodes.get(key))

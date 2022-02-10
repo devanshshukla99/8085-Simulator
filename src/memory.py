@@ -4,7 +4,8 @@ from src.exceptions import ValueErrorHexRequired, InvalidMemoryAddress, MemoryLi
 
 
 class Byte:
-    def __init__(self, data=None, _bytes=1) -> None:
+    def __init__(self, data=None, _bytes=1, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._bytes = _bytes
         self._mem_limit = "".join(["0x", "FF" * _bytes])
         self.data = "".join(["0x", "00" * _bytes])
@@ -33,6 +34,9 @@ class Byte:
         self.write(data)
         return True
 
+    def replace(self, *args, **kwargs) -> None:
+        return self._data.replace(*args, **kwargs)
+
     def lower(self):
         return self._data.lower()
 
@@ -50,7 +54,7 @@ class Byte:
         if type(value) is Byte:
             return True
         if not re.fullmatch("^0[x|X][0-9a-fA-F]+", value):
-            raise ValueErrorHexRequired()
+            raise ValueErrorHexRequired(value)
         return True
 
     def _verify_limit(self, value):
@@ -97,9 +101,6 @@ class Memory(dict):
             raise MemoryLimitExceeded()
         return True
 
-    def get(self, __k):
-        return self.__getitem__(__k)
-
     def __getitem__(self, __k):
         if __k not in self:
             if not self._verify_address(__k):
@@ -110,6 +111,12 @@ class Memory(dict):
 
     def __setitem__(self, __k, value) -> None:
         return super().__setitem__(__k, Byte(value))
+
+    def sort(self):
+        return dict(sorted(self.items(), key=lambda x: int(str(x[0]), 16)))
+
+    def get(self, __k):
+        return self.__getitem__(__k)
 
     pass
 
@@ -171,7 +178,7 @@ class Registers:
         self.HL = RegisterPair("H", "L")
         self.SP = RegisterPair("S", "P")
         self.PC = Byte(_bytes=2)
-        setattr(self.M.__func__, "read", lambda addr: self.HL.read_pair())
+        setattr(self.M.__func__, "read", lambda *args: self.HL.read_pair())
         return
 
     def M(self):
