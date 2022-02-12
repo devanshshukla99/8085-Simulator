@@ -59,13 +59,13 @@ def run(filename):
                 continue
             elif command == "quit" or command == "exit":
                 exit(-1)
-            elif command[0] == "/":
-                if command == "/c" or command == "/inspect":
-                    console.print(controller.op.inspect())
-                    continue
-                else:
-                    # ! REMOVE THIS LATER
-                    console.print(eval(command[1:]))
+            # elif command[0] == "/":
+            #     if command == "/c" or command == "/inspect":
+            #         console.print(controller.op.inspect())
+            #         continue
+            #     else:
+            #         # ! REMOVE THIS LATER
+            #         console.print(eval(command[1:]))
             else:
                 try:
                     controller.parse_and_call(command)
@@ -97,13 +97,13 @@ def main():
                 continue
             elif command == "quit" or command == "exit":
                 exit(-1)
-            elif command[0] == "/":
-                if command == "/c" or command == "/inspect":
-                    console.print(controller.op.inspect())
-                    continue
-                else:
-                    # ! REMOVE THIS LATER
-                    console.print(eval(command[1:]))
+            # elif command[0] == "/":
+            #     if command == "/c" or command == "/inspect":
+            #         console.print(controller.op.inspect())
+            #         continue
+            #     else:
+            #         # ! REMOVE THIS LATER
+            #         console.print(eval(command[1:]))
             else:
                 try:
                     controller.parse_and_call(command)
