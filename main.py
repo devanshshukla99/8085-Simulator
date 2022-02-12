@@ -26,12 +26,12 @@ Control unit
 I/O
 """
 
-from src.exceptions import OPCODENotFound
-from src.controller import Controller
-from rich.prompt import Prompt, Confirm
+from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
-from rich.console import Console
+from rich.prompt import Confirm, Prompt
+from core.controller import Controller
+from core.exceptions import OPCODENotFound
 
 
 def make_layout():

@@ -1,9 +1,10 @@
 import re
-from core.memory import Byte, SuperMemory
-from core.flags import flags
+
 from core.exceptions import OPCODENotFound, SyntaxError
-from core.util import decompose_byte, ishex
+from core.flags import flags
+from core.memory import Byte, SuperMemory
 from core.opcodes import opcodes_lookup
+from core.util import decompose_byte, ishex
 
 
 class Operations:

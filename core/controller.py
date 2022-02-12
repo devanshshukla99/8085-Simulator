@@ -1,10 +1,11 @@
 import re
 import inspect
+
 from rich.console import Console
 
+from core.exceptions import OPCODENotFound
 from core.instruction_set import Instructions
 from core.operations import Operations
-from core.exceptions import OPCODENotFound
 
 
 class Controller:
