@@ -9,6 +9,7 @@ from src.util import decompose_byte, ishex
 class Operations:
     def __init__(self) -> None:
         flags.reset()
+        self.flags = flags
         self.super_memory = SuperMemory()
         self.memory = self.super_memory.memory
         self._update_pc = self.super_memory._update_pc

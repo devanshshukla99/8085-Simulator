@@ -1,6 +1,17 @@
 import re
 
 
+def twos_complement(num, _base=16):
+    _bytes = int(len(format(int(num, _base), "x")) / 2) or 1
+    return format((1 << 8 * _bytes) - int(num, _base), f"#0{2 + _bytes*2}x")
+
+
+def comparehex(hex1, hex2):
+    if int(str(hex1), 16) == int(str(hex2), 16):
+        return True
+    return False
+
+
 def ishex(data):
     return bool(re.fullmatch(r"^0[x|X][0-9a-fA-F]+", data))
 

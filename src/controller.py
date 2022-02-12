@@ -59,10 +59,9 @@ class Controller:
             return None, None
         if command[0] == "#":  # Directive
             command = command[1:]
-        _proc_command = re.split(r",| |''", command)
-        for x in _proc_command:
-            if x == "":
-                _proc_command.remove(x)
+        _proc_command = re.split(r",| ", command)
+        for _ in range(_proc_command.count("")):
+            _proc_command.remove("")
         opcode = _proc_command[0]
         args = _proc_command[1:]
         print(opcode, args)
@@ -114,5 +113,9 @@ class Controller:
 
     def reset(self) -> None:
         return self.__init__(console=self.console)
+
+    def reset_callstack(self) -> None:
+        self._callstack = []
+        return True
 
     pass

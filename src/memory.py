@@ -70,7 +70,7 @@ class Hex:
         return
 
     def read(self, *args, **kwargs) -> str:
-        return self._data
+        return self
 
     def write(self, val: str, *args, **kwargs) -> bool:
         self.data = val
