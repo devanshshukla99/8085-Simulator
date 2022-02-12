@@ -42,7 +42,8 @@ class Controller:
         return self.console.print(self.__repr__())
 
     def _lookup_opcode_func(self, opcode):
-        if func := self.lookup.get(opcode):
+        func = self.lookup.get(opcode)
+        if func:
             return func
         raise OPCODENotFound
 

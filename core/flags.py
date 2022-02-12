@@ -17,7 +17,13 @@ class Flags:
     Z: bool = False
 
     def items(self):
-        return {"C": self.C, "AC": self.AC, "S": self.S, "P": self.P, "Z": self.Z,}.items()
+        return {
+            "C": self.C,
+            "AC": self.AC,
+            "S": self.S,
+            "P": self.P,
+            "Z": self.Z,
+        }.items()
 
     def reset(self):
         self.C = False

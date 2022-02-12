@@ -39,7 +39,9 @@ def make_layout():
     layout = Layout(name="main")
 
     layout["main"].split(
-        Layout(name="side"), Layout(name="body", ratio=2), splitter="row",
+        Layout(name="side"),
+        Layout(name="body", ratio=2),
+        splitter="row",
     )
     layout["side"].split(Layout(name="registers"), Layout(name="flags"))
     layout["body"].split(Layout(name="cmd_area", ratio=2), Layout(name="memory"))
