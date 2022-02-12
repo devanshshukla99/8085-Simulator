@@ -1,9 +1,9 @@
 import re
-import json
-from src.memory import Byte, SuperMemory
-from src.flags import flags
-from src.exceptions import OPCODENotFound, SyntaxError
-from src.util import decompose_byte, ishex
+from core.memory import Byte, SuperMemory
+from core.flags import flags
+from core.exceptions import OPCODENotFound, SyntaxError
+from core.util import decompose_byte, ishex
+from core.opcodes import opcodes_lookup
 
 
 class Operations:
@@ -28,8 +28,7 @@ class Operations:
             "PC": self.super_memory.PC,
             "M": self.super_memory.M,
         }
-        with open("src/opcodes.json", "r") as f:
-            self._lookup_opcodes_dir = json.load(f)
+        self._lookup_opcodes_dir = opcodes_lookup
 
         self._keywords = []
         self._generate_keywords()

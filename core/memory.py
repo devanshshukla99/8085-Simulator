@@ -1,6 +1,6 @@
 import re
 import textwrap
-from src.exceptions import InvalidMemoryAddress, MemoryLimitExceeded
+from core.exceptions import InvalidMemoryAddress, MemoryLimitExceeded
 
 
 class Hex:

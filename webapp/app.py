@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, Response, make_response
-from src.controller import Controller
-from src.flags import flags
-from src.exceptions import OPCODENotFound
+from flask import Flask, render_template, request, make_response
+from core.controller import Controller
+from core.flags import flags
+from core.exceptions import OPCODENotFound
 
 CLEAR_TOKEN = "batman"
 app = Flask(__name__, static_folder="static")

@@ -1,5 +1,5 @@
-from src.flags import flags
-from src.util import decompose_byte, twos_complement
+from core.flags import flags
+from core.util import decompose_byte, twos_complement
 
 
 class Instructions:
