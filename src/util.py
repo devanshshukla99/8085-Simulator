@@ -1,3 +1,10 @@
+import re
+
+
+def ishex(data):
+    return bool(re.fullmatch(r"^0[x|X][0-9a-fA-F]+", data))
+
+
 def sanatize_hex(data):
     return data.replace("0x", "").replace("0X", "")
 

@@ -1,7 +1,5 @@
 import re
-import json
 import inspect
-import warnings
 from rich.console import Console
 
 from src.instruction_set import Instructions
@@ -14,74 +12,107 @@ class Controller:
         self.console = console
         if not console:
             self.console = Console()
+        # operations
         self.op = Operations()
+        # instruction set
+        self._jump_flag = False
+        self._address_jump_flag = None
         self.instruct_set = Instructions(self.op)
         self.lookup = {
             name.upper(): call
             for name, call in inspect.getmembers(self.instruct_set, inspect.ismethod)
             if "_" not in name
         }
-        self._set_opcodes()
+        # callstack
+        self._callstack = []
+        self.ready = False
         return
 
     def __repr__(self):
-        return self.op.inspect()
+        return f"{self.op.inspect()}\n{self.__callstackrepr__()}"
 
-    def _set_opcodes(self):
-        opcodes = None
-        with open("src/opcodes.json", "r") as f:
-            opcodes = json.load(f)
-        opcode_keys = list(opcodes.keys())
-        for key in opcode_keys:
-            if callback := self.lookup.get(key, None):
-                self.instruct_set._set_opcode(callback, opcodes.get(key))
-                continue
-            warnings.warn(f"opcode {key} not defined")
-        return True
+    def __callstackrepr__(self) -> str:
+        return f"<CallStack calls={len(self._callstack)}>"
+
+    def _call(self, func, *args, **kwargs) -> bool:
+        return func(*args)
 
     def inspect(self):
         return self.console.print(self.__repr__())
 
+    def _lookup_opcode_func(self, opcode):
+        if func := self.lookup.get(opcode):
+            return func
+        raise OPCODENotFound
+
+    @property
+    def callstack(self) -> list:
+        return self._callstack
+
+    def _addjob(self, func, args: tuple = (), **kwargs) -> bool:
+        self._callstack.append((func, args, kwargs))
+        return True
+
     def _parser(self, command):
-        command.strip()
+        command = command.strip()
         if not command:
             return None, None
-        command_proc = re.split(",|\ ", command)
-        if "" in command_proc:
-            command_proc.remove("")
-        print(command_proc)
-        opcode = command_proc[0]
-        args = command_proc[1:]
-        if f"{self.instruct_set._jump_flag}:" in opcode:
-            print(f"Jump stopped {args}")
-            command = command.replace(f"{self.instruct_set._jump_flag}: ", "")
-            print(command)
-            self.instruct_set._jump_flag = False
-            return self._parser(command)
-        return opcode, args
-
-    def _call(self, command, opcode, *args, **kwargs) -> None:
-        if func := self.lookup.get(opcode.upper()):
-            print(args)
-            self.op.opcode_fetch(func, command, *args, **kwargs)
-            return func(*args, **kwargs)
-        raise OPCODENotFound()
-
-    def parse_and_call(self, command):
         if command[0] == "#":  # Directive
             command = command[1:]
+        _proc_command = re.split(r",| |''", command)
+        for x in _proc_command:
+            if x == "":
+                _proc_command.remove(x)
+        opcode = _proc_command[0]
+        args = _proc_command[1:]
+        print(opcode, args)
+        return opcode.upper(), args
+
+    def parse(self, command):
+        _jnc_flip = False
         opcode, args = self._parser(command)
-        print(opcode)
-        if not opcode:
-            raise OPCODENotFound()
-        if not self.instruct_set._jump_flag:
-            return self._call(command, opcode, *args)
-        else:
-            print(f"Jump encountered {self.instruct_set._jump_flag}")
+        if self._jump_flag:
+            if opcode == self._jump_flag:
+                self._jump_flag = False
+                _jnc_flip = True
+                _current_pc = str(self.op.super_memory.PC)
+                self.op.memory_write(self._address_jump_flag[0], "0x" + _current_pc[4:])
+                self.op.memory_write(self._address_jump_flag[1], _current_pc[0:4])
+                opcode, args = self._parser(" ".join(args))
+
+        opcode_func = self._lookup_opcode_func(opcode)
+        self.op.prepare_operation(opcode, *args)
+        self._addjob(opcode_func, args, jnc_flip=_jnc_flip)
+
+        if opcode == "JNC":
+            self._jump_flag = (args[0] + ":").upper()
+            self._address_jump_flag = [str(self.op.super_memory.PC), str(self.op.super_memory.PC + 1)]
+            print(self._address_jump_flag)
+            self.op._update_pc("0xff")
+            self.op._update_pc("0xff")
+
+        self.ready = True
+        return True
 
     def parse_all(self, commands):
-        for command in commands:
-            self.parse_and_call(command)
-        return
+        for command in commands.split("\n"):
+            if command:
+                self.parse(command)
+        return True
+
+    def run(self):
+        for idx, val in enumerate(self._callstack):
+            print(f"{idx} -- {val} ", end="")
+            func, args, kwargs = val
+            jnc_flip = kwargs.pop("jnc_flip", False)
+            if not jnc_flip:
+                if self.instruct_set._jump_flag:
+                    print("JUMP ENCOUNTERED")
+                    continue
+            self._call(func, *args, **kwargs)
+        return True
+
+    def reset(self) -> None:
+        return self.__init__(console=self.console)
 
     pass

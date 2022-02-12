@@ -77,15 +77,24 @@ class Instructions:
         self.op.register_pair_write(addr, data_to_write, log=False)
         return True
 
+    def inr(self, addr) -> bool:
+        data = self.op.memory_read(addr)
+        data_to_write = format(int(data, 16) + 1, "#04x")
+        self.op.memory_write(addr, data_to_write, log=False)
+        return True
+
     def lhld(self, addr) -> bool:
         data_1 = self.op.memory_read(addr)
-        nxt_addr = format(int(addr, 16) + 1, "#6x")
+        print(f"=========={addr}===========")
+        nxt_addr = format(int(addr, 16) + 1, "#06x")
+        print(f"=========={nxt_addr}===========")
         data_2 = self.op.memory_read(nxt_addr)
+        print(f"=========={data_2}===========")
         self.op.memory_write("H", data_2)
         self.op.memory_write("L", data_1)
         return True
 
-    def xchg(self) -> bool:
+    def xchg(self, *args) -> bool:
         data_1 = self.op.register_pair_read("H")
         data_2 = self.op.register_pair_read("D")
         self.op.register_pair_write("D", data_1)
@@ -109,6 +118,7 @@ class Instructions:
 
     def jnc(self, jump_flag) -> bool:
         if not flags.C:
+            print(jump_flag)
             self._jump_flag = jump_flag
         return True
 

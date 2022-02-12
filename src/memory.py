@@ -66,10 +66,10 @@ class Hex:
     @data.setter
     def data(self, val: str) -> None:
         self._verify(val)
-        self._data = format(int(val, self._base), self._format_spec)
+        self._data = format(int(str(val), self._base), self._format_spec)
         return
 
-    def read(self) -> str:
+    def read(self, *args, **kwargs) -> str:
         return self._data
 
     def write(self, val: str, *args, **kwargs) -> bool:
@@ -225,12 +225,22 @@ class SuperMemory:
             """
         )
 
-    def inspect(self):
-        return "\n\n".join([self._reg_inspect(), str(self.memory.sort())])
+    def _registers_todict(self):
+        return {
+            "A/PSW": f"{self.A} {self.PSW}",
+            "BC": f"{self.BC}",
+            "DE": f"{self.DE}",
+            "HL": f"{self.HL}",
+            "SP": f"{self.SP}",
+            "PC": f"{self.PC}",
+        }
 
-    def _write_pc(self, data):
+    def _update_pc(self, data):
         self.memory[str(self.PC)] = data
         next(self.PC)
         return True
+
+    def inspect(self):
+        return "\n\n".join([self._reg_inspect(), str(self.memory.sort())])
 
     pass
