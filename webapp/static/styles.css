@@ -1,0 +1,67 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    grid-auto-rows: 100px;
+    grid-template-areas:
+      "a d d d d c "
+      "a d d d d c"
+      "b d d d d c"
+      "b d d d d c";
+    /* grid-template-columns: 100px 80px 100px; */
+    grid-template-columns: auto auto auto auto;
+    grid-template-rows: 80px auto 80px; 
+    column-gap: 10px;
+    row-gap: 15px;
+}
+/* .table-responsive {
+    display: block;
+    overflow-y:scroll;
+    max-height:300px;
+} */
+.registers-flags {
+    display: flex;
+    padding: 1rem;
+    flex-direction: column;
+}
+.memory-container {
+    display: flex;
+    padding: 1rem;
+    flex-direction: row;
+}
+
+.code-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+.code-container .button-head {
+    padding: 1rem;
+    /* margin: 1rem; */
+}
+textarea {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    resize: none;
+}
+textarea:focus-visible{
+    outline: 0px;
+}
+.item1 {
+    grid-area: a;
+}
+.item2 {
+grid-area: b;
+}
+.item3 {
+grid-area: c;
+}
+.item4 {
+grid-area: d;
+}
