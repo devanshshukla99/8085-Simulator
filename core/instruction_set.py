@@ -59,7 +59,7 @@ class Instructions:
 
     def mov(self, to_addr, from_addr) -> bool:
         data = self.op.memory_read(from_addr)
-        self.op.memory_write(to_addr, data, log=False)
+        self.op.memory_write(to_addr, data)
         return True
 
     def sta(self, addr) -> bool:
@@ -116,13 +116,13 @@ class Instructions:
     def inx(self, addr) -> bool:
         data = self.op.register_pair_read(addr)
         data_to_write = format(int(data, 16) + 1, "#06x")
-        self.op.register_pair_write(addr, data_to_write, log=False)
+        self.op.register_pair_write(addr, data_to_write)
         return True
 
     def inr(self, addr) -> bool:
         data = self.op.memory_read(addr)
         data_to_write = data + 1
-        self.op.memory_write(addr, data_to_write, log=False)
+        self.op.memory_write(addr, data_to_write)
         return True
 
     def lhld(self, addr) -> bool:

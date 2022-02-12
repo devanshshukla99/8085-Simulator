@@ -59,7 +59,8 @@ class Operations:
 
     def _get_register(self, addr):
         addr = addr.upper()
-        if _register := self._registers_list.get(addr, None):
+        _register = self._registers_list.get(addr, None)
+        if _register:
             return _register
         raise SyntaxError(msg="next link not found; check the instruction")
 
@@ -70,7 +71,8 @@ class Operations:
         print(f"##{_args_hexs}##")
         _opcode_search_params = " ".join([opcode, *_args_params]).upper()
         print(f"**{_opcode_search_params}**")
-        if _opcode_hex := self._lookup_opcodes_dir.get(_opcode_search_params):
+        _opcode_hex = self._lookup_opcodes_dir.get(_opcode_search_params)
+        if _opcode_hex:
             return _opcode_hex, _args_hexs
         raise OPCODENotFound
 
@@ -84,20 +86,17 @@ class Operations:
 
     def memory_read(self, addr) -> Byte:
         print(f"memory read {addr}")
-        if _parsed_addr := self._parse_addr(addr):
+        _parsed_addr = self._parse_addr(addr)
+        if _parsed_addr:
             return _parsed_addr.read(addr)
         data = self.memory.read(addr)
-        # self._write_opcode(data)
         return data
 
-    def memory_write(self, addr, data, log=True) -> bool:
+    def memory_write(self, addr, data) -> bool:
         print(f"memory write {addr}|{data}")
-        if _parsed_addr := self._parse_addr(addr):
-            # if log:
-            #     self._write_opcode(data)
+        _parsed_addr = self._parse_addr(addr)
+        if _parsed_addr:
             return _parsed_addr.write(data, addr)
-        # if log:
-        #     self._write_opcode(addr)
         self.memory[addr] = data
         return True
 
@@ -108,10 +107,8 @@ class Operations:
         # self._write_opcode(data)
         return data
 
-    def register_pair_write(self, addr, data, log=True) -> bool:
+    def register_pair_write(self, addr, data) -> bool:
         print(f"register pair write {addr}|{data}")
-        # if log:
-        #     self._write_opcode(data)
         _register = self._get_register(addr)
         _register.write_pair(data)
         return True
