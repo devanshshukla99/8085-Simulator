@@ -1,5 +1,4 @@
 import pytest
-from src.memory import Hex
 
 
 def test_reset(controller):

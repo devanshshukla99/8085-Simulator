@@ -30,6 +30,7 @@ from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.prompt import Confirm, Prompt
+
 from core.controller import Controller
 from core.exceptions import OPCODENotFound
 
