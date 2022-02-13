@@ -1,7 +1,6 @@
 from flask import Flask, make_response, render_template, request
 
 from core.controller import Controller
-from core.exceptions import OPCODENotFound
 from core.flags import flags
 
 CLEAR_TOKEN = "batman"
@@ -29,8 +28,9 @@ def assemble():
         try:
             controller.parse_all(commands.decode())
             return render_template("render_memory.html", memory=controller.op.memory)
-        except OPCODENotFound:
-            pass
+        except Exception as e:
+            print(e)
+            return make_response(f"Exception raised {e}", 400)
     return make_response("Record not found", 400)
 
 
@@ -41,11 +41,16 @@ def run():
     if controller.ready:
         try:
             controller.run()
-            return render_template(
-                "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
-            )
-        except OPCODENotFound:
-            pass
+            return {
+                "registers_flags": render_template(
+                    "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
+                ),
+                "memory": render_template("render_memory.html", memory=controller.op.memory),
+            }
+
+        except Exception as e:
+            print(e)
+            return make_response(f"Exception raised {e}", 400)
     return make_response("Record not found", 400)
 
 

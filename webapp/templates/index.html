@@ -39,7 +39,9 @@
                     alert(response)
                 }
                 else {
-                    document.getElementById("registers-flags").innerHTML = response;
+                    const _resp_dict = JSON.parse(response)
+                    document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
+                    document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 }
             };
             let _code = document.getElementById("code").value
