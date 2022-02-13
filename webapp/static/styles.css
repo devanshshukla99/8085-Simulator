@@ -21,6 +21,9 @@
     column-gap: 10px;
     row-gap: 15px;
 }
+table {
+    text-align: center
+}
 /* .table-responsive {
     display: block;
     overflow-y:scroll;
