@@ -1,3 +1,4 @@
+import json
 from flask import Flask, make_response, render_template, request
 
 from core.controller import Controller
@@ -23,14 +24,19 @@ def reset():
 @app.route("/assemble", methods=["POST"])
 def assemble():
     global controller
-    commands = request.data
-    if commands:
-        try:
-            controller.parse_all(commands.decode())
-            return render_template("render_memory.html", memory=controller.op.memory)
-        except Exception as e:
-            print(e)
-            return make_response(f"Exception raised {e}", 400)
+    commands_json = request.data
+    if commands_json:
+        commands_dict = json.loads(commands_json)
+        _commands = commands_dict.get("code", None)
+        _flags = commands_dict.get("flags", None)
+        if _commands and _flags:
+            try:
+                controller.set_flags(_flags)
+                controller.parse_all(_commands)
+                return render_template("render_memory.html", memory=controller.op.memory)
+            except Exception as e:
+                print(e)
+                return make_response(f"Exception raised {e}", 400)
     return make_response("Record not found", 400)
 
 

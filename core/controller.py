@@ -113,6 +113,9 @@ class Controller:
             self._call(func, *args, **kwargs)
         return True
 
+    def set_flags(self, *args, **kwargs):
+        return self.op.flags.set_flags(*args, **kwargs)
+
     def reset(self) -> None:
         return self.__init__(console=self.console)
 

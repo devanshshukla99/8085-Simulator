@@ -8,6 +8,7 @@
     window.onload = function () {
         console.log("load")
         document.getElementById("run").disabled = true
+
         document.getElementById("assemble").addEventListener("click", function () {
             console.log("assemble")
             const request = new XMLHttpRequest();
@@ -26,7 +27,18 @@
             let _code = document.getElementById("code").value
             if (_code) {
                 console.log("sent")
-                request.send(_code);
+                console.log(JSON.stringify(
+                    {
+                        "code": _code,
+                        "flags": GetFlags()
+                    }
+                ))
+                request.send(JSON.stringify(
+                    {
+                        "code": _code,
+                        "flags": GetFlags()
+                    }
+                ));
             }
         });
         document.getElementById("run").addEventListener("click", function () {
@@ -65,6 +77,15 @@
             };
             request.send();
         });
+    }
+    function GetFlags() {
+        var flags_dict = {}
+        document.querySelectorAll(".flag-input").forEach(element => {
+            console.log(element.checked);
+            flags_dict[element.id] = element.checked
+        });
+        return flags_dict
+
     }
 </script>
 {% endblock %}
