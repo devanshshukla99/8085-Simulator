@@ -1,5 +1,4 @@
 import pytest
-from src.memory import Hex
 
 
 def test_reset(controller):
@@ -184,7 +183,6 @@ def test_dad(controller):
 def test_jnc_nocarry(controller):
     controller.reset()
     controller.op.flags.C = False
-    print(f"{controller.op.flags.C=}")
     controller.parse("mvi a, 0x14")
     controller.parse("jnc down")
     controller.parse("mvi a, 0x18")
@@ -198,7 +196,6 @@ def test_jnc_nocarry(controller):
 def test_jnc_carry(controller):
     controller.reset()
     controller.op.flags.C = True
-    print(f"{controller.op.flags.C=}")
     controller.parse("mvi a, 0x14")
     controller.parse("jnc down")
     controller.parse("mvi a, 0x18")

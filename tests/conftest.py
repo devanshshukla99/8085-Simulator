@@ -1,5 +1,6 @@
 import pytest
-from src.controller import Controller
+
+from core.controller import Controller
 
 
 @pytest.fixture(scope="function")
