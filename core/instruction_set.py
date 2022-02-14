@@ -14,42 +14,67 @@ class Instructions:
     def _next_addr(self, addr):
         return format(int(str(addr), 16) + 1, "#06x")
 
-    def _check_flags_and_compute(self, data_1, data_2, add=True):
-        og2 = data_2
-        if not add:
-            data_2 = twos_complement(str(data_2))
-        print(data_1, data_2)
+    def _check_carry(self, data_1, data_2, og2, add=True, _AC=True, _CY=True):
+        """
+        Method to check both `CY` and `AC` flags.
+
+        `aux_data` are the LSB of the two data to be added
+        For example: for `0x11` and `0xae`, `aux_data=["0x1", "0xe"]`
+        """
         decomposed_data_1 = decompose_byte(data_1, nibble=True)
         decomposed_data_2 = decompose_byte(data_2, nibble=True)
-        _carry_data, _aux_data = list(zip(decomposed_data_1, decomposed_data_2))
+        carry_data, aux_data = list(zip(decomposed_data_1, decomposed_data_2))
 
-        if (int(_aux_data[0], 16) + int(_aux_data[1], 16)) >= 16:
-            print("AUX FLAG")
-            flags.AC = True
-        if add:
-            if (int(_carry_data[0], 16) + int(_carry_data[1], 16)) >= 16:
-                flags.CY = True
-                print("CARRY FLAG+")
-        else:
+        if _AC:
+            if (int(aux_data[0], 16) + int(aux_data[1], 16)) >= 16:
+                print("AUX FLAG")
+                flags.AC = True
+
+        if not _CY:
+            return
+
+        if not add:
             if int(str(data_1), 16) < int(str(og2), 16):
                 print("CARRY FLAG-")
                 flags.CY = True
-        result = int(str(data_1), 16) + int(str(data_2), 16)
-        print(result)
-        if result >= 255:
-            result -= 256
+            return
 
-        result_hex = format(result, "#4x")
-        data_bin = format(result, "08b")
+        if (int(carry_data[0], 16) + int(carry_data[1], 16)) >= 16:
+            flags.CY = True
+            print("CARRY FLAG+")
+        return
+
+    def _check_parity(self, data_bin: str):
         _count_1s = data_bin.count("1")
         if not _count_1s % 2:
             flags.P = True
             print("PARITY")
+        return
 
-        print(result, result_hex, data_bin)
+    def _check_sign(self, data_bin: str):
         if int(data_bin[0]):
             flags.S = True
             print("SIGN")
+        return
+
+    def _check_flags_and_compute(self, data_1, data_2, add=True, _AC=True, _CY=True, _P=True, _S=True):
+        og2 = data_2
+        if not add:
+            data_2 = twos_complement(str(data_2))
+        print(data_1, data_2)
+
+        result = int(str(data_1), 16) + int(str(data_2), 16)
+        print(result)
+        if result >= 255:
+            result -= 256
+        result_hex = format(result, "#4x")
+        data_bin = format(result, "08b")
+
+        self._check_carry(data_1, data_2, og2, add=add, _AC=_AC, _CY=_CY)
+        if _P:
+            self._check_parity(data_bin)
+        if _S:
+            self._check_sign(data_bin)
         return result_hex
 
     def mvi(self, addr, data) -> bool:
@@ -143,11 +168,18 @@ class Instructions:
         return True
 
     def dad(self, addr) -> bool:
+        """
+        `DAD` only affects the `CY` flag
+        """
         data_1 = self.op.register_pair_read(addr)
         data_2 = self.op.register_pair_read("H")
         addition = int(data_1, 16) + int(data_2, 16)
+
+        # check `CY` flag
         if addition > int("0xffff", 16):
-            raise NotImplementedError("Carry flag not implemented yet!")
+            addition = addition - (int("0xffff", 16) + 1)
+            flags.CY = True
+
         addition = format(addition, "#06x")
         self.op.register_pair_write("H", addition)
         return True

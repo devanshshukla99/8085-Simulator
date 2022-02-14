@@ -176,9 +176,26 @@ def test_xchg(controller):
     assert str(controller.op.register_pair_read("D")) == "0x1815"
 
 
-@pytest.mark.xfail
 def test_dad(controller):
-    raise pytest.xfail
+    controller.reset()
+    controller.parse("lxi h, 0xffee")
+    controller.parse("lxi d, 0x1248")
+    controller.parse("dad d")
+    controller.run()
+
+    assert str(controller.op.register_pair_read("H")) == "0x1236"
+    assert str(controller.op.register_pair_read("D")) == "0x1248"
+    assert controller.op.flags.CY is True
+
+    controller.reset()
+    controller.parse("lxi h, 0x4821")
+    controller.parse("lxi d, 0x3492")
+    controller.parse("dad d")
+    controller.run()
+
+    assert str(controller.op.register_pair_read("H")) == "0x7cb3"
+    assert str(controller.op.register_pair_read("D")) == "0x3492"
+    assert controller.op.flags.CY is False
 
 
 def test_jnc_nocarry(controller):
