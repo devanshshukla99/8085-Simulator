@@ -7,6 +7,9 @@
 <script>
     window.onload = function () {
         console.log("load")
+        // reload code contents
+        document.getElementById("code").value = localStorage.getItem("code")
+
         document.getElementById("run").disabled = true
 
         document.getElementById("assemble").addEventListener("click", function () {
@@ -26,6 +29,8 @@
             };
             let _code = document.getElementById("code").value
             if (_code) {
+                // save code
+                localStorage.setItem("code", _code)
                 console.log("sent")
                 console.log(JSON.stringify(
                     {
