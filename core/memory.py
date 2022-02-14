@@ -15,7 +15,7 @@ class Hex:
         self.data = data
         return
 
-    def __call__(self, value: str):
+    def __call__(self, value: str) -> None:
         self.data = value
 
     def __str__(self) -> str:
@@ -23,9 +23,6 @@ class Hex:
 
     def __repr__(self) -> str:
         return self._data
-
-    def __call__(self, val) -> None:
-        self.data = val
 
     def __int__(self) -> int:
         return int(self._data, self._base)

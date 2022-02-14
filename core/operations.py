@@ -1,5 +1,3 @@
-import re
-
 from core.exceptions import OPCODENotFound, SyntaxError
 from core.flags import flags
 from core.memory import Byte, SuperMemory

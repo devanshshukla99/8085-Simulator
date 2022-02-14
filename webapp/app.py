@@ -1,4 +1,5 @@
 import json
+
 from flask import Flask, make_response, render_template, request
 
 from core.controller import Controller
