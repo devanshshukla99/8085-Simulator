@@ -5,7 +5,6 @@ from core.util import decompose_byte, twos_complement
 class Instructions:
     def __init__(self, op) -> None:
         self.op = op
-        self._next_link = {"A": "PSW", "B": "C", "D": "E", "H": "L", "S": "P"}
         self._jump_flag = False
         pass
 
@@ -29,12 +28,12 @@ class Instructions:
             flags.AC = True
         if add:
             if (int(_carry_data[0], 16) + int(_carry_data[1], 16)) >= 16:
-                flags.C = True
+                flags.CY = True
                 print("CARRY FLAG+")
         else:
             if int(str(data_1), 16) < int(str(og2), 16):
                 print("CARRY FLAG-")
-                flags.C = True
+                flags.CY = True
         result = int(str(data_1), 16) + int(str(data_2), 16)
         print(result)
         if result >= 255:
@@ -102,8 +101,8 @@ class Instructions:
             from_addr = "A"
         to_data = self.op.memory_read(to_addr)
         from_data = self.op.memory_read(from_addr)
-        if flags.C:
-            flags.C = False
+        if flags.CY:
+            flags.CY = False
             from_data += 1
         result_data = self._check_flags_and_compute(from_data, to_data, add=False)
         self.op.memory_write(from_addr, result_data)
@@ -154,7 +153,7 @@ class Instructions:
         return True
 
     def jnc(self, jump_flag) -> bool:
-        if not flags.C:
+        if not flags.CY:
             print(jump_flag)
             self._jump_flag = jump_flag
         return True

@@ -83,7 +83,7 @@ def test_sub(controller):
     assert controller.op.flags.S is False
     assert controller.op.flags.Z is False
     assert controller.op.flags.AC is False
-    assert controller.op.flags.C is True
+    assert controller.op.flags.CY is True
     assert controller.op.flags.P is True
 
     controller.reset()
@@ -96,7 +96,7 @@ def test_sub(controller):
     assert controller.op.flags.Z is False
     assert controller.op.flags.AC is True
     assert controller.op.flags.P is True
-    assert controller.op.flags.C is True
+    assert controller.op.flags.CY is True
 
 
 def test_sbb(controller):
@@ -111,7 +111,7 @@ def test_sbb(controller):
     assert controller.op.flags.Z is False
     assert controller.op.flags.AC is True
     assert controller.op.flags.P is False
-    assert controller.op.flags.C is True
+    assert controller.op.flags.CY is True
 
 
 def test_lxi(controller):
@@ -176,13 +176,14 @@ def test_xchg(controller):
     assert str(controller.op.register_pair_read("D")) == "0x1815"
 
 
+@pytest.mark.xfail
 def test_dad(controller):
-    pass
+    raise pytest.xfail
 
 
 def test_jnc_nocarry(controller):
     controller.reset()
-    controller.op.flags.C = False
+    controller.op.flags.CY = False
     controller.parse("mvi a, 0x14")
     controller.parse("jnc down")
     controller.parse("mvi a, 0x18")
@@ -195,7 +196,7 @@ def test_jnc_nocarry(controller):
 
 def test_jnc_carry(controller):
     controller.reset()
-    controller.op.flags.C = True
+    controller.op.flags.CY = True
     controller.parse("mvi a, 0x14")
     controller.parse("jnc down")
     controller.parse("mvi a, 0x18")

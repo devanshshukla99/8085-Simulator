@@ -12,11 +12,11 @@ class Flags:
 
     def __init__(self) -> None:
         self._flags = {
-            "C": False,
-            "AC": False,
-            "S": False,
-            "P": False,
-            "Z": False,
+            "CY": False,  # D0
+            "P": False,  # D2
+            "AC": False,  # D4
+            "Z": False,  # D6
+            "S": False,  # D7
         }
 
     def __repr__(self):
@@ -46,7 +46,7 @@ class Flags:
             f"""
             Flags
             -----
-            C = {self.C}
+            C = {self.CY}
             AC = {self.AC}
             S = {self.S}
             P = {self.P}
@@ -54,11 +54,11 @@ class Flags:
             """
         )
 
-    C = property(fget=lambda self: self._flags.get("C"), fset=lambda self, val: self._flags.__setitem__("C", val))
-    AC = property(fget=lambda self: self._flags.get("AC"), fset=lambda self, val: self._flags.__setitem__("AC", val))
-    S = property(fget=lambda self: self._flags.get("S"), fset=lambda self, val: self._flags.__setitem__("S", val))
+    CY = property(fget=lambda self: self._flags.get("CY"), fset=lambda self, val: self._flags.__setitem__("CY", val))
     P = property(fget=lambda self: self._flags.get("P"), fset=lambda self, val: self._flags.__setitem__("P", val))
+    AC = property(fget=lambda self: self._flags.get("AC"), fset=lambda self, val: self._flags.__setitem__("AC", val))
     Z = property(fget=lambda self: self._flags.get("Z"), fset=lambda self, val: self._flags.__setitem__("Z", val))
+    S = property(fget=lambda self: self._flags.get("S"), fset=lambda self, val: self._flags.__setitem__("S", val))
 
     pass
 
