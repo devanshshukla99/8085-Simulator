@@ -39,6 +39,7 @@ window.onload = function () {
             ));
         }
     });
+
     document.getElementById("run").addEventListener("click", function () {
         console.log("run")
         const request = new XMLHttpRequest();
@@ -57,6 +58,7 @@ window.onload = function () {
         let _code = document.getElementById("code").value
         request.send(_code);
     });
+
     document.getElementById("reset").addEventListener("click", function () {
         console.log("reset")
         const request = new XMLHttpRequest();
@@ -76,6 +78,7 @@ window.onload = function () {
         request.send();
     });
 }
+
 function GetFlags() {
     var flags_dict = {}
     document.querySelectorAll(".flag-input").forEach(element => {
