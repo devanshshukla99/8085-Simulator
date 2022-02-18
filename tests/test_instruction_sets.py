@@ -222,3 +222,41 @@ def test_jnc_carry(controller):
 
     assert str(controller.op.memory_read("A")) == "0x18"
     assert str(controller.op.memory_read("B")) == "0x21"
+
+
+@pytest.mark.parametrize(
+    "inp, out, in_cy_flag, out_cy_flag",
+    [
+        ("0x14", "0x28", False, False),
+        ("0x14", "0x29", True, False),
+        ("0xfa", "0xf4", False, True),
+        ("0xfa", "0xf5", True, True),
+    ],
+)
+def test_ral(controller, inp, out, in_cy_flag, out_cy_flag):
+    controller.reset()
+    controller.op.flags.CY = in_cy_flag
+    controller.parse(f"mvi a, {inp}")
+    controller.parse("ral")
+    controller.run()
+    assert str(controller.op.memory_read("A")) == out
+    assert controller.op.flags.CY == out_cy_flag
+
+
+@pytest.mark.parametrize(
+    "inp, out, in_cy_flag, out_cy_flag",
+    [
+        ("0x14", "0x28", False, False),
+        ("0x14", "0x28", True, False),
+        ("0xfa", "0xf5", False, True),
+        ("0xfa", "0xf5", True, True),
+    ],
+)
+def test_rlc(controller, inp, out, in_cy_flag, out_cy_flag):
+    controller.reset()
+    controller.op.flags.CY = in_cy_flag
+    controller.parse(f"mvi a, {inp}")
+    controller.parse("rlc")
+    controller.run()
+    assert str(controller.op.memory_read("A")) == out
+    assert controller.op.flags.CY == out_cy_flag
