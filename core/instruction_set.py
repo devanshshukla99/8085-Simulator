@@ -198,6 +198,52 @@ class Instructions:
         self.op.memory_write(nxt_addr, data_1)
         return True
 
+    def ral(self) -> bool:
+        """
+        <--CY--A7----A0<---<-
+        |                   |
+        ->------------------>
+        """
+        data = self.op.memory_read("A")
+        data_bin = list(format(int(str(data), 16), "08b"))
+        rolled_data_bin = []
+
+        for i in range(0, len(data_bin[:-1])):
+            rolled_data_bin.append(data_bin[i + 1])
+
+        # CY into new LSB
+        rolled_data_bin.insert(8, str(int(flags.CY)))
+        # MSB into CY
+        flags.CY = bool(int(data_bin[0]))
+
+        rolled_data_bin = "".join(rolled_data_bin)
+        data_new = format(int(rolled_data_bin, 2), "#02x")
+        self.op.memory_write("A", data_new)
+        return True
+
+    def rlc(self) -> bool:
+        """
+        CY<---A7----A0<---<-
+            |              |
+            ->------------->
+        """
+        data = self.op.memory_read("A")
+        data_bin = list(format(int(str(data), 16), "08b"))
+        rolled_data_bin = []
+
+        for i in range(0, len(data_bin[:-1])):
+            rolled_data_bin.append(data_bin[i + 1])
+
+        # CY into new LSB
+        rolled_data_bin.insert(8, str(int(data_bin[0])))
+        # MSB into CY
+        flags.CY = bool(int(data_bin[0]))
+
+        rolled_data_bin = "".join(rolled_data_bin)
+        data_new = format(int(rolled_data_bin, 2), "#02x")
+        self.op.memory_write("A", data_new)
+        return True
+
     def hlt(self) -> bool:
         raise StopIteration
 
