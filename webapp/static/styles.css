@@ -2,7 +2,6 @@
     margin: 0px;
     padding: 0px;
 }
-
 .main {
     margin-left: 1rem;
     margin-top: 1rem;
@@ -24,11 +23,15 @@
 table {
     text-align: center
 }
-/* .table-responsive {
-    display: block;
-    overflow-y:scroll;
-    max-height:300px;
-} */
+.memory-container {
+    display: flex;
+    justify-content: center;
+    height: 80vh;
+    width: 250px;
+    overflow-y: auto;
+    border-collapse: collapse;
+    text-align: center
+}
 .registers-flags {
     display: flex;
     padding: 1rem;
