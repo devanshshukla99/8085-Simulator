@@ -67,7 +67,7 @@ class Instructions:
         print(result)
         if result >= 255:
             result -= 256
-        result_hex = format(result, "#4x")
+        result_hex = format(result, "#04x")
         data_bin = format(result, "08b")
 
         self._check_carry(data_1, data_2, og2, add=add, _AC=_AC, _CY=_CY)
