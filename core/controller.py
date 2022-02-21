@@ -101,16 +101,34 @@ class Controller:
                 self.parse(command)
         return True
 
-    def run(self):
-        for idx, val in enumerate(self._callstack):
-            print(f"{idx} -- {val} ", end="")
-            func, args, kwargs = val
+    def run_once(self):
+        if not self._callstack:
+            return False
+        try:
+            func, args, kwargs = self._callstack.pop(0)
             jnc_flip = kwargs.pop("jnc_flip", False)
             if not jnc_flip:
                 if self.instruct_set._jump_flag:
                     print("JUMP ENCOUNTERED")
-                    continue
+                    return
             self._call(func, *args, **kwargs)
+        except StopIteration:
+            pass
+        return True
+
+    def run(self):
+        for idx, val in enumerate(self._callstack):
+            try:
+                print(f"{idx} -- {val} ", end="")
+                func, args, kwargs = val
+                jnc_flip = kwargs.pop("jnc_flip", False)
+                if not jnc_flip:
+                    if self.instruct_set._jump_flag:
+                        print("JUMP ENCOUNTERED")
+                        continue
+                self._call(func, *args, **kwargs)
+            except StopIteration:
+                pass
         return True
 
     def set_flags(self, *args, **kwargs):
