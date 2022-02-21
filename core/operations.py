@@ -22,8 +22,7 @@ class Operations:
             "E": self.super_memory.DE,
             "H": self.super_memory.HL,
             "L": self.super_memory.HL,
-            "S": self.super_memory.SP,
-            "P": self.super_memory.SP,
+            "SP": self.super_memory.SP,
             "PC": self.super_memory.PC,
             "M": self.super_memory.M,
         }

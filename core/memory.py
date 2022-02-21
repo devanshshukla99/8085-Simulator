@@ -191,6 +191,65 @@ class RegisterPair:
         return True
 
 
+class StackPointer(Byte):
+    def __init__(self, memory, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.memory = memory
+
+    def __add__(self, val: int, *args, **kwargs) -> str:
+        """
+        val: `int`
+        """
+        data_int = int(self._data, self._base) + val
+        if data_int > self._memory_limit:
+            data_int -= self._memory_limit
+        elif data_int < 0:
+            data_int += self._memory_limit
+        self._data = format(data_int, self._format_spec)
+        return self._data
+
+    def __sub__(self, val: int, *args, **kwargs) -> str:
+        """
+        val: `int`
+        """
+        data_int = int(self._data, self._base) - val
+        if data_int > self._memory_limit:
+            data_int -= self._memory_limit
+        elif data_int < 0:
+            data_int += self._memory_limit
+        self._data = format(data_int, self._format_spec)
+        return self._data
+
+    def __next__(self):
+        return self.__add__(1)
+
+    def read(self, *args, **kwargs) -> Byte:
+        """
+        POP rp
+        """
+        bin1 = format(int(str(self.memory[self.__add__(1)]), self._base), f"0{8}b")  # single byte
+        bin2 = format(int(str(self.memory[self.__add__(1)]), self._base), f"0{8}b")  # single byte
+        bin_total = "".join(["0b", bin2, bin1])
+        return f'0x{format(int(bin_total, 2), f"0{4}x")}'
+
+    def write(self, data, *args) -> Byte:
+        """
+        PUSH rp
+        rp = BC, DE, HL, or PSW
+        """
+        mem_size = 8
+        binary_data = format(int(str(data), self._base), f"0{self._bytes*8}b")
+        data_1, data_2 = [
+            format(int(binary_data[mem_size * x : mem_size * (x + 1)], 2), f"#0{int(mem_size/2)}x")
+            for x in range(0, int(len(binary_data) / mem_size))
+        ]
+        self.memory.write(self._data, data_1)
+        _ = self.__sub__(1)
+        self.memory.write(self._data, data_2)
+        _ = self.__sub__(1)
+        return True
+
+
 class SuperMemory:
     def __init__(self) -> None:
         self.memory = Memory(65535, "0x0000")
@@ -200,10 +259,11 @@ class SuperMemory:
         self.BC = RegisterPair("B", "C")
         self.DE = RegisterPair("D", "E")
         self.HL = RegisterPair("H", "L")
-        self.SP = RegisterPair("S", "P")
+        self.SP = StackPointer(self.memory, "0xFFFF", _bytes=2)
         self.PC = Byte(_bytes=2)
         setattr(self.M.__func__, "read", lambda *args: self.memory[self.HL.read_pair()])
         setattr(self.M.__func__, "write", lambda data, *args: self.memory.write(self.HL.read_pair(), data))
+
         pass
 
     def M(self):

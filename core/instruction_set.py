@@ -244,6 +244,23 @@ class Instructions:
         self.op.memory_write("A", data_new)
         return True
 
+    def push(self, addr) -> bool:
+        """
+        addd: register pair
+        PUSH rp
+        rp = BC, DE, HL, or PSW
+        """
+        data_1 = self.op.register_pair_read(addr)
+        return self.op.super_memory.SP.write(data_1)
+
+    def pop(self, addr) -> bool:
+        """
+        POP rp
+        rp = BC, DE, HL, or PSW
+        """
+        data_1 = self.op.super_memory.SP.read()
+        return self.op.register_pair_write(addr, data_1)
+
     def hlt(self) -> bool:
         raise StopIteration
 
