@@ -4,6 +4,8 @@ window.onload = function () {
     document.getElementById("code").value = localStorage.getItem("code")
 
     document.getElementById("run").disabled = true
+    document.getElementById("step").disabled = true
+
 
     document.getElementById("assemble").addEventListener("click", function () {
         console.log("assemble")
@@ -17,6 +19,7 @@ window.onload = function () {
             }
             else {
                 document.getElementById("run").disabled = false
+                document.getElementById("step").disabled = false
                 document.getElementById("memory-container").innerHTML = response;
             }
         };
@@ -59,6 +62,25 @@ window.onload = function () {
         request.send(_code);
     });
 
+    document.getElementById("step").addEventListener("click", function () {
+        console.log("step")
+        const request = new XMLHttpRequest();
+        request.open("POST", `/run-once`);
+        request.onload = () => {
+            const response = request.responseText;
+            if (request.status != 200) {
+                alert(response)
+            }
+            else {
+                const _resp_dict = JSON.parse(response)
+                document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
+                document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
+            }
+        };
+        let _code = document.getElementById("code").value
+        request.send(_code);
+    });
+
     document.getElementById("reset").addEventListener("click", function () {
         console.log("reset")
         const request = new XMLHttpRequest();
@@ -73,6 +95,7 @@ window.onload = function () {
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 document.getElementById("run").disabled = true
+                document.getElementById("step").disabled = true
             }
         };
         request.send();
