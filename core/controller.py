@@ -4,6 +4,7 @@ import inspect
 from rich.console import Console
 
 from core.exceptions import OPCODENotFound
+from core.flags import jump_flags
 from core.instruction_set import Instructions
 from core.operations import Operations
 
@@ -61,6 +62,14 @@ class Controller:
             return None, None
         if command[0] == "#":  # Directive
             command = command[1:]
+
+        match = re.match("^[a-zA-Z]+:", command)
+        if match:
+            label = match.group()[:-1]
+            print(f"{label=}")
+            jump_flags.add(label, self.op.super_memory.PC)
+            return self._parser(command.replace(f"{label}:", ""))
+
         _proc_command = re.split(r",| ", command)
         for _ in range(_proc_command.count("")):
             _proc_command.remove("")
@@ -72,10 +81,12 @@ class Controller:
     def parse(self, command):
         _jnc_flip = False
         opcode, args = self._parser(command)
+
         if self._jump_flag:
             if opcode == self._jump_flag:
                 self._jump_flag = False
                 _jnc_flip = True
+                # replace placeholder to actual mem codes
                 _current_pc = str(self.op.super_memory.PC)
                 self.op.memory_write(self._address_jump_flag[0], "0x" + _current_pc[4:])
                 self.op.memory_write(self._address_jump_flag[1], _current_pc[0:4])
@@ -89,8 +100,8 @@ class Controller:
             self._jump_flag = (args[0] + ":").upper()
             self._address_jump_flag = [str(self.op.super_memory.PC), str(self.op.super_memory.PC + 1)]
             print(self._address_jump_flag)
-            self.op._update_pc("0xff")
-            self.op._update_pc("0xff")
+            self.op._update_pc("0xff")  # placeholders
+            self.op._update_pc("0xff")  # placeholders
 
         self.ready = True
         return True
@@ -129,6 +140,10 @@ class Controller:
                 self._call(func, *args, **kwargs)
             except StopIteration:
                 pass
+        return True
+
+    def set_flag(self, key, val):
+        self.op.flags[key] = val
         return True
 
     def set_flags(self, *args, **kwargs):

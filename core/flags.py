@@ -1,6 +1,21 @@
 import textwrap
 
 
+class JumpFlags:
+    def __init__(self, *args, **kwargs) -> None:
+        # super().__init__(*args, **kwargs)
+        self._labels = {}
+        self._endpoints = {}
+        self._jumps = []
+        pass
+
+    def add(self, label: str, counter: str, endpoint=None) -> None:
+        self._jumps.append({"label": label, "counter": counter, "endpoint": endpoint})
+        # reserve 2 bytes in the counter
+        
+        return
+
+
 class Flags:
     """
     C = Carry
@@ -21,6 +36,9 @@ class Flags:
 
     def __repr__(self):
         return self.inspect()
+
+    def __setitem__(self, key, val):
+        self._flags[key] = val
 
     def _set_property(self, key):
         return property(fget=lambda: self._flags.__getitem__(key), fset=lambda val: self._flags.__setitem__(key, val))
@@ -46,11 +64,11 @@ class Flags:
             f"""
             Flags
             -----
-            C = {self.CY}
-            AC = {self.AC}
-            S = {self.S}
+            CY = {self.CY}
             P = {self.P}
+            AC = {self.AC}
             Z = {self.Z}
+            S = {self.S}
             """
         )
 
@@ -63,4 +81,5 @@ class Flags:
     pass
 
 
+jump_flags = JumpFlags()
 flags = Flags()

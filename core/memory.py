@@ -250,6 +250,18 @@ class StackPointer(Byte):
         return True
 
 
+class ProgramCounter(Byte):
+    def __init__(self, memory, _bytes=2, *args, **kwargs) -> None:
+        super().__init__(_bytes=2, *args, **kwargs)
+        self.memory = memory
+        return
+
+    def write(self, data):
+        self.memory[self._data] = data
+        self.__next__()
+        return True
+
+
 class SuperMemory:
     def __init__(self) -> None:
         self.memory = Memory(65535, "0x0000")
@@ -260,7 +272,7 @@ class SuperMemory:
         self.DE = RegisterPair("D", "E")
         self.HL = RegisterPair("H", "L")
         self.SP = StackPointer(self.memory, "0xFFFF", _bytes=2)
-        self.PC = Byte(_bytes=2)
+        self.PC = ProgramCounter(self.memory)  # Byte(_bytes=2)
         setattr(self.M.__func__, "read", lambda *args: self.memory[self.HL.read_pair()])
         setattr(self.M.__func__, "write", lambda data, *args: self.memory.write(self.HL.read_pair(), data))
 
@@ -294,8 +306,10 @@ class SuperMemory:
         }
 
     def _update_pc(self, data):
-        self.memory[str(self.PC)] = data
-        next(self.PC)
+        # self.memory[str(self.PC)] = data
+        # next(self.PC)
+        # return True
+        self.PC.write(data)
         return True
 
     def inspect(self):

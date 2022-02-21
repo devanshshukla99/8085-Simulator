@@ -1,4 +1,4 @@
-from core.flags import flags
+from core.flags import flags, jump_flags
 from core.util import decompose_byte, twos_complement
 
 
@@ -188,6 +188,7 @@ class Instructions:
         if not flags.CY:
             print(jump_flag)
             self._jump_flag = jump_flag
+            jump_flags["JNC"] = jump_flag
         return True
 
     def shld(self, addr) -> bool:
