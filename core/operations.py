@@ -11,7 +11,6 @@ class Operations:
         self.flags = flags
         self.super_memory = SuperMemory()
         self.memory = self.super_memory.memory
-        self._update_pc = self.super_memory._update_pc
         self.super_memory.PC("0x0800")
         self._registers_list = {
             "A": self.super_memory.A,
@@ -51,7 +50,6 @@ class Operations:
 
     def _parse_addr(self, addr):
         addr = addr.upper()
-        print(f"_parse_addr {self._registers_list.get(addr, None)}")
         return self._registers_list.get(addr, None)
 
     def _get_register(self, addr):
@@ -63,11 +61,8 @@ class Operations:
 
     def _opcode_fetch(self, opcode, *args, **kwargs) -> None:
         _args_params = [x for x in args if self.iskeyword(x)]
-        print(f"##{_args_params}##")
         _args_hexs = [decompose_byte(x) for x in args if ishex(x)]
-        print(f"##{_args_hexs}##")
         _opcode_search_params = " ".join([opcode, *_args_params]).upper()
-        print(f"**{_opcode_search_params}**")
         _opcode_hex = self._lookup_opcodes_dir.get(_opcode_search_params)
         if _opcode_hex:
             return _opcode_hex, _args_hexs
@@ -75,10 +70,10 @@ class Operations:
 
     def prepare_operation(self, opcode, *args, **kwargs) -> bool:
         _opcode_hex, _args_hex = self._opcode_fetch(opcode, *args)
-        self._update_pc(_opcode_hex)
+        self.super_memory.PC.write(_opcode_hex)
         for x in _args_hex:
             for y in x[::-1]:
-                self._update_pc(y)
+                self.super_memory.PC.write(y)
         return True
 
     def memory_read(self, addr) -> Byte:
@@ -89,12 +84,13 @@ class Operations:
         data = self.memory.read(addr)
         return data
 
-    def memory_write(self, addr, data) -> bool:
+    def memory_write(self, addr: str, data) -> bool:
+        addr = str(addr)
         print(f"memory write {addr}|{data}")
         _parsed_addr = self._parse_addr(addr)
         if _parsed_addr:
             return _parsed_addr.write(data, addr)
-        self.memory[addr] = data
+        self.memory.write(addr, data)
         return True
 
     def register_pair_read(self, addr) -> Byte:

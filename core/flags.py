@@ -1,19 +1,32 @@
+from core.memory import Hex
+
 import textwrap
 
 
-class JumpFlags:
-    def __init__(self, *args, **kwargs) -> None:
-        # super().__init__(*args, **kwargs)
-        self._labels = {}
-        self._endpoints = {}
-        self._jumps = []
-        pass
+class JumpFlag:
+    def __init__(self, label: str, counter: str, *args, **kwargs) -> None:
+        self._label = label.upper()
+        print(f"&&&{counter}")
+        self._counter = Hex(str(counter), _bytes=2)
+        print(f"&&&{self._counter}")
+        self._endpoint = ""
 
-    def add(self, label: str, counter: str, endpoint=None) -> None:
-        self._jumps.append({"label": label, "counter": counter, "endpoint": endpoint})
-        # reserve 2 bytes in the counter
-        
-        return
+    def __repr__(self) -> str:
+        return f"<label:{self._label} counter:{self._counter} endpoint:{self._endpoint}>"
+
+    def __eq__(self, val: object) -> bool:
+        return self._label == val.upper()
+
+    def __bool__(self) -> bool:
+        return bool(self._label)
+
+    def match(self, label: str) -> bool:
+        return label.upper() == self._label
+
+    def upper(self) -> str:
+        return self._label.upper()
+
+    pass
 
 
 class Flags:
@@ -81,5 +94,4 @@ class Flags:
     pass
 
 
-jump_flags = JumpFlags()
 flags = Flags()

@@ -1,4 +1,4 @@
-from core.flags import flags, jump_flags
+from core.flags import flags
 from core.util import decompose_byte, twos_complement
 
 
@@ -10,6 +10,12 @@ class Instructions:
 
     def _set_opcode(self, func, opcodes):
         return setattr(func.__func__, "opcodes", opcodes)
+
+    def _is_jump_opcode(self, opcode):
+        opcode = opcode.upper()
+        if opcode not in ["JNC", "JC", "JZ", "JNZ"]:  # add more later
+            return False
+        return True
 
     def _next_addr(self, addr):
         return format(int(str(addr), 16) + 1, "#06x")
@@ -26,6 +32,7 @@ class Instructions:
         carry_data, aux_data = list(zip(decomposed_data_1, decomposed_data_2))
 
         if _AC:
+            flags.AC = False
             if (int(aux_data[0], 16) + int(aux_data[1], 16)) >= 16:
                 print("AUX FLAG")
                 flags.AC = True
@@ -34,17 +41,19 @@ class Instructions:
             return
 
         if not add:
+            flags.C = False
             if int(str(data_1), 16) < int(str(og2), 16):
                 print("CARRY FLAG-")
                 flags.CY = True
             return
 
-        if (int(carry_data[0], 16) + int(carry_data[1], 16)) >= 16:
-            flags.CY = True
-            print("CARRY FLAG+")
+        # if (int(carry_data[0], 16) + int(carry_data[1], 16)) >= 16:
+        #     flags.CY = True
+        #     print("CARRY FLAG+")
         return
 
     def _check_parity(self, data_bin: str):
+        flags.P = False
         _count_1s = data_bin.count("1")
         if not _count_1s % 2:
             flags.P = True
@@ -52,20 +61,29 @@ class Instructions:
         return
 
     def _check_sign(self, data_bin: str):
+        flags.S = False
         if int(data_bin[0]):
             flags.S = True
             print("SIGN")
         return
 
-    def _check_flags_and_compute(self, data_1, data_2, add=True, _AC=True, _CY=True, _P=True, _S=True):
+    def _check_zero(self, result: str):
+        flags.Z = False
+        if int(result, 2) == 0:
+            flags.Z = True
+            print("ZERO")
+        return
+
+    def _check_flags_and_compute(self, data_1, data_2, add=True, _AC=True, _CY=True, _P=True, _S=True, _Z=True):
         og2 = data_2
         if not add:
             data_2 = twos_complement(str(data_2))
-        print(data_1, data_2)
 
         result = int(str(data_1), 16) + int(str(data_2), 16)
-        print(result)
-        if result >= 255:
+        if result > 255:
+            if _CY:
+                flags.CY = True
+                print("CARRY FLAG+")
             result -= 256
         result_hex = format(result, "#04x")
         data_bin = format(result, "08b")
@@ -75,6 +93,8 @@ class Instructions:
             self._check_parity(data_bin)
         if _S:
             self._check_sign(data_bin)
+        if _Z:
+            self._check_zero(data_bin)
         return result_hex
 
     def mvi(self, addr, data) -> bool:
@@ -95,7 +115,6 @@ class Instructions:
         """
         stores at current location
         """
-        print(f"db {args}")
         for x in args:
             self.op._update_pc(x)
         return True
@@ -137,25 +156,43 @@ class Instructions:
         self.op.register_pair_write(addr, data)
         return True
 
+    def inr(self, addr) -> bool:
+        data = self.op.memory_read(addr)
+        data_to_write = self._check_flags_and_compute(data, "0x01", _CY=False)
+        #  = data + 1
+        self.op.memory_write(addr, data_to_write)
+        return True
+
     def inx(self, addr) -> bool:
+        """
+        The flags are not at all affected by the execution of this instruction.
+        """
         data = self.op.register_pair_read(addr)
+        # data_to_write = self._check_flags_and_compute(data, "0x01")
         data_to_write = format(int(data, 16) + 1, "#06x")
         self.op.register_pair_write(addr, data_to_write)
         return True
 
-    def inr(self, addr) -> bool:
+    def dcr(self, addr) -> bool:
         data = self.op.memory_read(addr)
-        data_to_write = data + 1
+        data_to_write = self._check_flags_and_compute(data, "0x01", add=False, _CY=False)
         self.op.memory_write(addr, data_to_write)
+        return True
+
+    def dcx(self, addr) -> bool:
+        """
+        The flags are not at all affected by the execution of this instruction.
+        """
+        data = self.op.register_pair_read(addr)
+        # data_to_write = self._check_flags_and_compute(data, "0x01", add=False)
+        data_to_write = format(int(data, 16) - 1, "#06x")
+        self.op.register_pair_write(addr, data_to_write)
         return True
 
     def lhld(self, addr) -> bool:
         data_1 = self.op.memory_read(addr)
-        print(f"=========={addr}===========")
         nxt_addr = format(int(addr, 16) + 1, "#06x")
-        print(f"=========={nxt_addr}===========")
         data_2 = self.op.memory_read(nxt_addr)
-        print(f"=========={data_2}===========")
         self.op.memory_write("H", data_2)
         self.op.memory_write("L", data_1)
         return True
@@ -184,11 +221,16 @@ class Instructions:
         self.op.register_pair_write("H", addition)
         return True
 
-    def jnc(self, jump_flag) -> bool:
+    def jnc(self, label, *args, **kwargs) -> bool:
+        bounce_to_label = kwargs.get("bounce_to_label")
         if not flags.CY:
-            print(jump_flag)
-            self._jump_flag = jump_flag
-            jump_flags["JNC"] = jump_flag
+            return bounce_to_label(label)
+        return True
+
+    def jnz(self, label, *args, **kwargs) -> bool:
+        bounce_to_label = kwargs.get("bounce_to_label")
+        if not flags.Z:
+            return bounce_to_label(label)
         return True
 
     def shld(self, addr) -> bool:
