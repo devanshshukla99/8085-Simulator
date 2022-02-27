@@ -1,7 +1,7 @@
 window.onload = function () {
     console.log("load")
     // reload code contents
-    document.getElementById("code").value = localStorage.getItem("code")
+    document.getElementById("code").innerHTML = localStorage.getItem("code")
 
     document.getElementById("run").disabled = true
     document.getElementById("step").disabled = true
@@ -13,7 +13,6 @@ window.onload = function () {
         request.open("POST", `/assemble`);
         request.onload = () => {
             const response = request.responseText;
-            console.log(request.status)
             if (request.status != 200) {
                 alert(response)
             }
@@ -23,17 +22,11 @@ window.onload = function () {
                 document.getElementById("memory-container").innerHTML = response;
             }
         };
-        let _code = document.getElementById("code").value
+        var _code = UnApplyHighlights(ProcessCode(document.getElementById("code").innerHTML))
         if (_code) {
             // save code
-            localStorage.setItem("code", _code)
+            localStorage.setItem("code", UnProcessCode(_code))
             console.log("sent")
-            console.log(JSON.stringify(
-                {
-                    "code": _code,
-                    "flags": GetFlags()
-                }
-            ))
             request.send(JSON.stringify(
                 {
                     "code": _code,
@@ -58,8 +51,8 @@ window.onload = function () {
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
             }
         };
-        let _code = document.getElementById("code").value
-        request.send(_code);
+        var _code = ProcessCode(document.getElementById("code").innerHTML)
+        request.send(UnApplyHighlights(_code));
     });
 
     document.getElementById("step").addEventListener("click", function () {
@@ -73,12 +66,15 @@ window.onload = function () {
             }
             else {
                 const _resp_dict = JSON.parse(response)
+                index = _resp_dict["index"];
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
+                document.getElementById("code").innerHTML = UnProcessCode(ApplyHighlights(_code, index))
+                console.log(index)
             }
         };
-        let _code = document.getElementById("code").value
-        request.send(_code);
+        var _code = ProcessCode(document.getElementById("code").innerHTML)
+        request.send(UnApplyHighlights(_code));
     });
 
     document.getElementById("reset").addEventListener("click", function () {
@@ -96,6 +92,7 @@ window.onload = function () {
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 document.getElementById("run").disabled = true
                 document.getElementById("step").disabled = true
+                document.getElementById("code").innerHTML = UnApplyHighlights(document.getElementById("code").innerHTML)
             }
         };
         request.send();
@@ -105,9 +102,34 @@ window.onload = function () {
 function GetFlags() {
     var flags_dict = {}
     document.querySelectorAll(".flag-input").forEach(element => {
-        console.log(element.checked);
         flags_dict[element.id] = element.checked
     });
     return flags_dict
 
+}
+function ProcessCode(code) {
+    code = code.replaceAll("<div>", "\n")
+    code = code.replaceAll("</div>", "")
+    code = code.replaceAll("<br>", "\n")
+    return code
+}
+function UnProcessCode(code) {
+    return code.replaceAll("\n", "<br>")
+}
+function UnApplyHighlights(code) {
+    code = code.replaceAll(/<highlight>/gm, "")
+    code = code.replaceAll(/<\/highlight>/gm, "")
+    return code.replaceAll("<br>", "\n")
+}
+function ApplyHighlights(code, index) {
+    code = ProcessCode(code)
+    code = UnApplyHighlights(code)
+    code = code.split("\n")
+    if (index < code.length) {
+        if (code[index]) {
+            code[index] = "<highlight>" + code[index] + "</highlight>"
+            return code.join("\n")
+        }
+    }
+    return code.join("\n")
 }

@@ -53,6 +53,14 @@ table {
     padding: 1rem;
     /* margin: 1rem; */
 }
+.code-box {
+    z-index: 1;
+    white-space: break-spaces;
+}
+highlight {
+    z-index: 2;
+    background: rgb(110, 110, 253);
+}
 textarea {
     margin-top: 0.5rem;
     padding: 0.5rem;
