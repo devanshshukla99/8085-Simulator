@@ -134,6 +134,7 @@ def test_inx(controller):
     assert controller.op.flags.P is False
     assert controller.op.flags.CY is False
 
+
 def test_inr(controller):
     """
     B = 05H --> 06H
@@ -200,6 +201,7 @@ def test_dcx(controller):
     assert controller.op.flags.AC is False
     assert controller.op.flags.P is False
     assert controller.op.flags.CY is False
+
 
 def test_lhld(controller):
     controller.reset()

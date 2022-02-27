@@ -1,6 +1,6 @@
-from core.memory import Hex
-
 import textwrap
+
+from core.memory import Hex
 
 
 class JumpFlag:
