@@ -128,15 +128,78 @@ def test_inx(controller):
     controller.parse("inx h")
     controller.run()
     assert str(controller.op.register_pair_read("H")) == "0x1565"
-
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is False
+    assert controller.op.flags.CY is False
 
 def test_inr(controller):
+    """
+    B = 05H --> 06H
+    CY=no change | AC=0 | S=0 | P=1 | Z=0
+    """
     controller.reset()
-    controller.parse("mvi b, 0x15")
+    controller.parse("mvi b, 0x05")
     controller.parse("inr b")
     controller.run()
-    assert str(controller.op.memory_read("B")) == "0x16"
+    assert str(controller.op.memory_read("B")) == "0x06"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
 
+    controller.reset()
+    controller.parse("mvi b, 0xff")
+    controller.parse("inr b")
+    controller.run()
+    assert str(controller.op.memory_read("B")) == "0x00"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is True
+    assert controller.op.flags.AC is True
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+
+def test_dcr(controller):
+    """
+    B = 45H --> 44H
+    CY=no change | AC=0 | S=0 | P=1 | Z=0
+    """
+    controller.reset()
+    controller.parse("dcr b")
+    controller.run()
+    assert str(controller.op.memory_read("B")) == "0xff"
+    assert controller.op.flags.S is True
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+    controller.reset()
+    controller.parse("mvi b, 0x45")
+    controller.parse("dcr b")
+    controller.run()
+    assert str(controller.op.memory_read("B")) == "0x44"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is True
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+
+def test_dcx(controller):
+    controller.reset()
+    controller.parse("lxi h, 0x1564")
+    controller.parse("dcx h")
+    controller.run()
+    assert str(controller.op.register_pair_read("H")) == "0x1563"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is False
+    assert controller.op.flags.CY is False
 
 def test_lhld(controller):
     controller.reset()
@@ -198,7 +261,6 @@ def test_dad(controller):
     assert controller.op.flags.CY is False
 
 
-@pytest.mark.xfail
 def test_jnc_nocarry(controller):
     controller.reset()
     controller.op.flags.CY = False
