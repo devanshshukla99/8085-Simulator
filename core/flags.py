@@ -4,15 +4,14 @@ from core.memory import Hex
 
 
 class JumpFlag:
-    def __init__(self, label: str, counter: str, *args, **kwargs) -> None:
+    def __init__(self, label: str, counter: str, command, *args, **kwargs) -> None:
         self._label = label.upper()
-        print(f"&&&{counter}")
         self._counter = Hex(str(counter), _bytes=2)
-        print(f"&&&{self._counter}")
+        self._command = command
         self._endpoint = ""
 
     def __repr__(self) -> str:
-        return f"<label:{self._label} counter:{self._counter} endpoint:{self._endpoint}>"
+        return f"<command:{self._command} label:{self._label} counter:{self._counter} endpoint:{self._endpoint}>"
 
     def __eq__(self, val: object) -> bool:
         return self._label == val.upper()

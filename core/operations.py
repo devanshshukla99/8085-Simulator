@@ -77,7 +77,7 @@ class Operations:
             for y in x[::-1]:
                 self.super_memory.PC.write(y)
                 _assembler.append(y)
-        self._assembler[command] = " ".join(_assembler)
+        self._assembler[command] = " ".join(_assembler).lower()
         return True
 
     def memory_read(self, addr) -> Byte:

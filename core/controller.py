@@ -93,6 +93,10 @@ class Controller:
                 _data_to_write = decompose_byte(str(_jump_label._counter))
                 self.op.memory_write(str(_target_label._counter + 1), _data_to_write[1])
                 self.op.memory_write(str(_target_label._counter + 2), _data_to_write[0])
+                _assembler = self.op._assembler[_target_label._command].replace("0xff", "").strip()
+                self.op._assembler[_target_label._command] = " ".join(
+                    [_assembler, _data_to_write[1], _data_to_write[0]]
+                )
 
     def inspect(self):
         return self.console.print(self.__repr__())
@@ -121,9 +125,7 @@ class Controller:
         match = re.match("^[a-zA-Z]+:", command)
         if match:
             label = match.group()[:-1]
-            kwargs["label"] = JumpFlag(label, self.op.super_memory.PC)
-            print("TARGET")
-            # self._target_label(label)
+            kwargs["label"] = JumpFlag(label, self.op.super_memory.PC, command)
             return self._parser(command.replace(f"{label}:", ""), *args, **kwargs)
 
         _proc_command = re.split(r",| ", command)
@@ -138,8 +140,7 @@ class Controller:
         opcode, args, kwargs = self._parser(command)
         if self.instruct_set._is_jump_opcode(opcode):
             # if JNZ | JC | etc ** kwargs the target-label **
-            kwargs["target-label"] = JumpFlag(args[0], self.op.super_memory.PC)
-            print("TARGET 2")
+            kwargs["target-label"] = JumpFlag(args[0], self.op.super_memory.PC, command)
             args.extend(["0xff", "0xff"])  # placeholder
         opcode_func = self._lookup_opcode_func(opcode)
         self._addjob(opcode, opcode_func, args, kwargs)
