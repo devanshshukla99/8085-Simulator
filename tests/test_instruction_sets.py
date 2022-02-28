@@ -228,8 +228,6 @@ def test_shld(controller):
     assert str(controller.op.memory_read("0x0700")) == "0x62"
     assert str(controller.op.memory_read("0x0701")) == "0x48"
 
-    print(controller.inspect())
-
 
 def test_xchg(controller):
     controller.reset()
@@ -263,30 +261,70 @@ def test_dad(controller):
     assert controller.op.flags.CY is False
 
 
-def test_jnc_nocarry(controller):
+@pytest.mark.parametrize("mem_acc, carry", [("0x14", True), ("0x18", False)])
+def test_jc(controller, mem_acc, carry):
     controller.reset()
-    controller.op.flags.CY = False
+    controller.op.flags.CY = carry
+    controller.parse("mvi a, 0x14")
+    controller.parse("jc down")
+    controller.parse("mvi a, 0x18")
+    controller.parse("down: mvi b, 0x21")
+    controller.run()
+
+    assert str(controller.op.memory_read("A")) == mem_acc
+    assert str(controller.op.memory_read("B")) == "0x21"
+
+    memos = [str(x).lower() for x in list(controller.op.memory.values())]
+    assert memos == [
+        "0x3e",
+        "0x14",
+        "0xda",
+        "0x07",
+        "0x08",
+        "0x3e",
+        "0x18",
+        "0x06",
+        "0x21",
+    ]
+
+
+@pytest.mark.parametrize("mem_acc, carry", [("0x14", False), ("0x18", True)])
+def test_jnc(controller, mem_acc, carry):
+    controller.reset()
+    controller.op.flags.CY = carry
     controller.parse("mvi a, 0x14")
     controller.parse("jnc down")
     controller.parse("mvi a, 0x18")
     controller.parse("down: mvi b, 0x21")
     controller.run()
 
-    assert str(controller.op.memory_read("A")) == "0x14"
+    assert str(controller.op.memory_read("A")) == mem_acc
     assert str(controller.op.memory_read("B")) == "0x21"
 
+    memos = [str(x) for x in list(controller.op.memory.values())]
+    assert memos == [
+        "0x3e",
+        "0x14",
+        "0xd2",
+        "0x07",
+        "0x08",
+        "0x3e",
+        "0x18",
+        "0x06",
+        "0x21",
+    ]
 
-def test_jnc_carry(controller):
+
+def test_jz(controller):
     controller.reset()
-    controller.op.flags.CY = True
-    controller.parse("mvi a, 0x14")
-    controller.parse("jnc down")
-    controller.parse("mvi a, 0x18")
-    controller.parse("down: mvi b, 0x21")
+    controller.parse("mvi a, 0x02")
+    controller.parse("LOOP: dcr a")
+    controller.parse("jnz LOOP")
     controller.run()
 
-    assert str(controller.op.memory_read("A")) == "0x18"
-    assert str(controller.op.memory_read("B")) == "0x21"
+    assert str(controller.op.memory_read("A")) == "0x00"
+    memo = [str(x).lower() for x in list(controller.op.memory.values())]
+    assert memo == ["0x3e", "0x02", "0x3d", "0xc2", "0x02", "0x08"]
 
 
 @pytest.mark.parametrize(
