@@ -29,7 +29,7 @@ class Controller:
         # callstack
         self._callstack = []
         self.ready = False
-        self._jump_methods = ["JNC", "JNZ"]
+        self._jump_methods = ["JNC", "JNZ", "JC"]
         self._wrap_bounceable_methods()
         self._run_idx = 0
         return

@@ -6,6 +6,7 @@ class Instructions:
     def __init__(self, op) -> None:
         self.op = op
         self._jump_flag = False
+        self._base = 16
         pass
 
     def _set_opcode(self, func, opcodes):
@@ -74,6 +75,15 @@ class Instructions:
             print("ZERO")
         return
 
+    def _check_flags(self, data_bin, _P=True, _S=True, _Z=True) -> bool:
+        if _P:
+            self._check_parity(data_bin)
+        if _S:
+            self._check_sign(data_bin)
+        if _Z:
+            self._check_zero(data_bin)
+        return True
+
     def _check_flags_and_compute(self, data_1, data_2, add=True, _AC=True, _CY=True, _P=True, _S=True, _Z=True):
         og2 = data_2
         if not add:
@@ -89,12 +99,7 @@ class Instructions:
         data_bin = format(result, "08b")
 
         self._check_carry(data_1, data_2, og2, add=add, _AC=_AC, _CY=_CY)
-        if _P:
-            self._check_parity(data_bin)
-        if _S:
-            self._check_sign(data_bin)
-        if _Z:
-            self._check_zero(data_bin)
+        self._check_flags(data_bin, _P=_P, _S=_S, _Z=_Z)
         return result_hex
 
     def mvi(self, addr, data) -> bool:
@@ -227,6 +232,18 @@ class Instructions:
             return bounce_to_label(label)
         return True
 
+    def jc(self, label, *args, **kwargs) -> bool:
+        bounce_to_label = kwargs.get("bounce_to_label")
+        if flags.CY:
+            return bounce_to_label(label)
+        return True
+
+    def jz(self, label, *args, **kwargs) -> bool:
+        bounce_to_label = kwargs.get("bounce_to_label")
+        if flags.Z:
+            return bounce_to_label(label)
+        return True
+
     def jnz(self, label, *args, **kwargs) -> bool:
         bounce_to_label = kwargs.get("bounce_to_label")
         if not flags.Z:
@@ -239,6 +256,17 @@ class Instructions:
         self.op.memory_write(addr, data_2)
         nxt_addr = format(int(addr, 16) + 1, "#06x")
         self.op.memory_write(nxt_addr, data_1)
+        return True
+
+    def ora(self, addr) -> bool:
+        """
+        OR logical instruction
+        """
+        data_1 = int(self.op.memory_read("A"))
+        data_2 = int(self.op.memory_read(addr))
+        result = format(data_1 | data_2, "#04x")
+        self.op.memory_write("A", result)
+        self._check_flags(format(int(result, self._base), "08b"))
         return True
 
     def ral(self) -> bool:

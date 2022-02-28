@@ -9,7 +9,7 @@ class Hex:
         self._bytes = _bytes
         self._base = 16
         self._format_spec = f"#0{2 + _bytes * 2}x"
-        self._format_spec_bin = f"#0{2 + _bytes * 4}b"
+        self._format_spec_bin = f"#0{2 + _bytes * 8}b"
         self._memory_limit_hex = "FF" * _bytes
         self._memory_limit = int(self._memory_limit_hex, self._base)
         self.data = data
