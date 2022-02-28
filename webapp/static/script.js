@@ -1,10 +1,10 @@
 window.onload = function () {
-    console.log("load")
+    console.log("load");
     // reload code contents
-    document.getElementById("code").innerHTML = localStorage.getItem("code")
+    document.getElementById("code").innerHTML = localStorage.getItem("code");
 
-    document.getElementById("run").disabled = true
-    document.getElementById("step").disabled = true
+    document.getElementById("run").disabled = true;
+    document.getElementById("step").disabled = true;
 
 
     document.getElementById("assemble").addEventListener("click", function () {
@@ -22,7 +22,7 @@ window.onload = function () {
                 document.getElementById("memory-container").innerHTML = response;
             }
         };
-        var _code = UnApplyHighlights(ProcessCode(document.getElementById("code").innerHTML))
+        var _code = UnApplyHighlights(ProcessCode(document.getElementById("code").innerHTML));
         if (_code) {
             // save code
             localStorage.setItem("code", UnProcessCode(_code))
@@ -37,13 +37,13 @@ window.onload = function () {
     });
 
     document.getElementById("run").addEventListener("click", function () {
-        console.log("run")
+        console.log("run");
         const request = new XMLHttpRequest();
         request.open("POST", `/run`);
         request.onload = () => {
             const response = request.responseText;
             if (request.status != 200) {
-                alert(response)
+                alert(response);
             }
             else {
                 const _resp_dict = JSON.parse(response)
@@ -52,12 +52,12 @@ window.onload = function () {
                 document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
             }
         };
-        var _code = ProcessCode(document.getElementById("code").innerHTML)
+        var _code = ProcessCode(document.getElementById("code").innerHTML);
         request.send(UnApplyHighlights(_code));
     });
 
     document.getElementById("step").addEventListener("click", function () {
-        console.log("step")
+        console.log("step");
         const request = new XMLHttpRequest();
         request.open("POST", `/run-once`);
         request.onload = () => {
@@ -71,11 +71,10 @@ window.onload = function () {
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
-                document.getElementById("code").innerHTML = UnProcessCode(ApplyHighlights(_code, index - 1))
-                console.log(index)
+                document.getElementById("code").innerHTML = UnProcessCode(ApplyHighlights(_code, index));
             }
         };
-        var _code = ProcessCode(document.getElementById("code").innerHTML)
+        var _code = ProcessCode(document.getElementById("code").innerHTML);
         request.send(UnApplyHighlights(_code));
     });
 
