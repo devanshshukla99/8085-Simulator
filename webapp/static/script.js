@@ -49,6 +49,7 @@ window.onload = function () {
                 const _resp_dict = JSON.parse(response)
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
+                document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
             }
         };
         var _code = ProcessCode(document.getElementById("code").innerHTML)
@@ -69,7 +70,8 @@ window.onload = function () {
                 index = _resp_dict["index"];
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
-                document.getElementById("code").innerHTML = UnProcessCode(ApplyHighlights(_code, index))
+                document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
+                document.getElementById("code").innerHTML = UnProcessCode(ApplyHighlights(_code, index - 1))
                 console.log(index)
             }
         };
@@ -90,6 +92,7 @@ window.onload = function () {
                 const _resp_dict = JSON.parse(response)
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
+                document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
                 document.getElementById("run").disabled = true
                 document.getElementById("step").disabled = true
                 document.getElementById("code").innerHTML = UnApplyHighlights(document.getElementById("code").innerHTML)

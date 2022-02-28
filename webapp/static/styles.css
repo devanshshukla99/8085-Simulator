@@ -13,7 +13,7 @@
       "a d d d d c "
       "a d d d d c"
       "b d d d d c"
-      "b d d d d c";
+      "b e e e e c";
     /* grid-template-columns: 100px 80px 100px; */
     grid-template-columns: auto auto auto auto;
     grid-template-rows: 80px auto 80px; 
@@ -68,16 +68,4 @@ textarea {
 }
 textarea:focus-visible{
     outline: 0px;
-}
-.item1 {
-    grid-area: a;
-}
-.item2 {
-grid-area: b;
-}
-.item3 {
-grid-area: c;
-}
-.item4 {
-grid-area: d;
 }

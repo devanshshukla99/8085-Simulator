@@ -143,7 +143,7 @@ class Controller:
             args.extend(["0xff", "0xff"])  # placeholder
         opcode_func = self._lookup_opcode_func(opcode)
         self._addjob(opcode, opcode_func, args, kwargs)
-        self.op.prepare_operation(opcode, *args)
+        self.op.prepare_operation(command, opcode, *args)
 
         """
         JNC ZO      ----   Target label
@@ -205,6 +205,7 @@ class Controller:
     def reset_callstack(self) -> None:
         self._callstack = []
         self._run_idx = 0
+        self.op._assembler = {}
         return True
 
     pass

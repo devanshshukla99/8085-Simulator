@@ -19,6 +19,7 @@ def reset():
             "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
         ),
         "memory": render_template("render_memory.html", memory=controller.op.memory),
+        "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
     }
 
 
@@ -53,6 +54,7 @@ def run():
                     "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
                 ),
                 "memory": render_template("render_memory.html", memory=controller.op.memory),
+                "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
             }
 
         except Exception as e:
@@ -74,6 +76,7 @@ def step():
                 "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
             ),
             "memory": render_template("render_memory.html", memory=controller.op.memory),
+            "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
         }
 
         # except Exception as e:

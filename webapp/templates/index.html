@@ -11,11 +11,11 @@
     <div class="registers-flags" id="registers-flags">
         {% include "render_registers_flags.html" %}
     </div>
-    <div class="memory-container item3" id="memory-container">
+    <div class="memory-container" style="grid-area: c;" id="memory-container">
         {% include "render_memory.html" %}
     </div>
 
-    <div class="code-container item4">
+    <div class="code-container" style="grid-area: d;">
         <div class="button-head">
             <button type="button" class="btn btn-primary btn-sm" id="assemble">Assemble</button>
             <button type="button" class="btn btn-success btn-sm" id="run">Run</button>
@@ -28,6 +28,9 @@
             <!-- <textarea class="form-control bg-dark text-white border-secondary" name="code" id="code" rows="25"
                 style="max-width: 100%;" autocomplete="new-password"></textarea> -->
         </div>
+    </div>
+    <div class="assembler-container text-white w-50" style="grid-area: e" id="assembler-container">
+        {% include "render_assembler.html" %}
     </div>
 </div>
 {% endblock %}

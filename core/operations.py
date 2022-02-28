@@ -29,6 +29,7 @@ class Operations:
 
         self._keywords = []
         self._generate_keywords()
+        self._assembler = {}
         pass
 
     def _generate_keywords(self):
@@ -68,12 +69,15 @@ class Operations:
             return _opcode_hex, _args_hexs
         raise OPCODENotFound
 
-    def prepare_operation(self, opcode, *args, **kwargs) -> bool:
+    def prepare_operation(self, command, opcode, *args, **kwargs) -> bool:
         _opcode_hex, _args_hex = self._opcode_fetch(opcode, *args)
         self.super_memory.PC.write(_opcode_hex)
+        _assembler = [_opcode_hex]
         for x in _args_hex:
             for y in x[::-1]:
                 self.super_memory.PC.write(y)
+                _assembler.append(y)
+        self._assembler[command] = " ".join(_assembler)
         return True
 
     def memory_read(self, addr) -> Byte:
