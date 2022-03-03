@@ -15,18 +15,18 @@
         {% include "render_memory.html" %}
     </div>
 
-    <div class="code-container" style="grid-area: d;">
+    <div class="controls-container" style="grid-area: d;">
         <div class="button-head">
             <button type="button" class="btn btn-primary btn-sm" id="assemble">Assemble</button>
             <button type="button" class="btn btn-success btn-sm" id="run">Run</button>
             <button type="button" class="btn btn-secondary btn-sm" id="step">Step</button>
             <button type="button" class="btn btn-danger btn-sm" id="reset">Reset</button>
         </div>
-        <div class="form-group">
-            <div class="code-box form-control bg-dark text-white border-secondary" id="code" contenteditable="true" -->
-            </div>
-            <!-- <textarea class="form-control bg-dark text-white border-secondary" name="code" id="code" rows="25"
-                style="max-width: 100%;" autocomplete="new-password"></textarea> -->
+        <div class="form-group code-container">
+            <textarea class="bg-dark text-primary" id="track" readonly></textarea>
+            <!-- <div class="code-box form-control bg-dark text-white border-secondary" id="code" contenteditable="true" -->
+            <textarea class="code-box bg-dark text-white border-secondary" id="code" autocomplete="new-password"
+                placeholder="code here"></textarea>
         </div>
     </div>
     <div class="assembler-container text-white w-50" style="grid-area: e" id="assembler-container">

@@ -24,42 +24,51 @@ table {
     text-align: center
 }
 .memory-container {
+    padding: 1rem;
+    text-align: center;
     display: flex;
+    flex-direction: row;
     justify-content: center;
     height: 80vh;
     width: 250px;
     overflow-y: auto;
     border-collapse: collapse;
-    text-align: center
 }
 .registers-flags {
     display: flex;
     padding: 1rem;
     flex-direction: column;
 }
-.memory-container {
+.code-container {
     display: flex;
-    padding: 1rem;
     flex-direction: row;
 }
-
-.code-container {
+.controls-container {
     display: flex;
     flex-direction: column;
     margin-top: 1rem;
     padding-top: 1rem;
+    min-height: 250px;
 }
-.code-container .button-head {
+.controls-container .button-head {
     padding: 1rem;
-    /* margin: 1rem; */
+}
+#track {
+    width: 10%;
+    resize: none;
+    align-content: right;
+}
+@media only screen and (min-width: 1080px) {
+    #track {
+        width: 5%;
+    }
 }
 .code-box {
-    z-index: 1;
+    outline: 0px;
     white-space: break-spaces;
-}
-highlight {
-    z-index: 2;
-    background: rgb(110, 110, 253);
+    min-height: 400px;
+    resize: none;
+    width: 100%;
 }
 textarea {
     margin-top: 0.5rem;

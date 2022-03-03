@@ -1,11 +1,10 @@
 window.onload = function () {
     console.log("load");
     // reload code contents
-    document.getElementById("code").innerHTML = localStorage.getItem("code");
+    document.getElementById("code").value = localStorage.getItem("code");
 
     document.getElementById("run").disabled = true;
     document.getElementById("step").disabled = true;
-
 
     document.getElementById("assemble").addEventListener("click", function () {
         console.log("assemble")
@@ -20,12 +19,13 @@ window.onload = function () {
                 document.getElementById("run").disabled = false
                 document.getElementById("step").disabled = false
                 document.getElementById("memory-container").innerHTML = response;
+                ProgressSideBar(_code, 0)
             }
         };
-        var _code = UnApplyHighlights(ProcessCode(document.getElementById("code").innerHTML));
+        var _code = document.getElementById("code").value.trim();
         if (_code) {
             // save code
-            localStorage.setItem("code", UnProcessCode(_code))
+            localStorage.setItem("code", _code)
             console.log("sent")
             request.send(JSON.stringify(
                 {
@@ -50,10 +50,11 @@ window.onload = function () {
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
+                ProgressSideBar(_code, _code.split("\n").length)
             }
         };
-        var _code = ProcessCode(document.getElementById("code").innerHTML);
-        request.send(UnApplyHighlights(_code));
+        var _code = document.getElementById("code").value.trim();
+        request.send(_code);
     });
 
     document.getElementById("step").addEventListener("click", function () {
@@ -63,6 +64,7 @@ window.onload = function () {
         request.onload = () => {
             const response = request.responseText;
             if (request.status != 200) {
+                AlertProgressSideBar()
                 alert(response)
             }
             else {
@@ -71,11 +73,12 @@ window.onload = function () {
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
-                document.getElementById("code").innerHTML = UnProcessCode(ApplyHighlights(_code, index));
+                document.getElementById("code").value = _code;
+                ProgressSideBar(_code, index)
             }
         };
-        var _code = ProcessCode(document.getElementById("code").innerHTML);
-        request.send(UnApplyHighlights(_code));
+        var _code = document.getElementById("code").value.trim();
+        request.send(_code);
     });
 
     document.getElementById("reset").addEventListener("click", function () {
@@ -94,7 +97,8 @@ window.onload = function () {
                 document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
                 document.getElementById("run").disabled = true
                 document.getElementById("step").disabled = true
-                document.getElementById("code").innerHTML = UnApplyHighlights(document.getElementById("code").innerHTML)
+                document.getElementById("track").textContent = ""
+
             }
         };
         request.send();
@@ -107,31 +111,21 @@ function GetFlags() {
         flags_dict[element.id] = element.checked
     });
     return flags_dict
-
 }
-function ProcessCode(code) {
-    code = code.replaceAll("<div>", "\n")
-    code = code.replaceAll("</div>", "")
-    code = code.replaceAll("<br>", "\n")
-    return code
+function AlertProgressSideBar() {
+    var track = document.getElementById("track");
+    _track = track.textContent.trim().split("\n")
+    _track[_track.length - 1] = "❌\n"
+    track.textContent = _track.join("\n")
 }
-function UnProcessCode(code) {
-    return code.replaceAll("\n", "<br>")
-}
-function UnApplyHighlights(code) {
-    code = code.replaceAll(/<highlight>/gm, "")
-    code = code.replaceAll(/<\/highlight>/gm, "")
-    return code.replaceAll("<br>", "\n")
-}
-function ApplyHighlights(code, index) {
-    code = ProcessCode(code)
-    code = UnApplyHighlights(code)
-    code = code.split("\n")
-    if (index < code.length) {
-        if (code[index]) {
-            code[index] = "<highlight>" + code[index] + "</highlight>"
-            return code.join("\n")
-        }
+function ProgressSideBar(code, index) {
+    var track = document.getElementById("track");
+    console.log(index, code, code.split("\n").length)
+    track.textContent = ""
+    for (let i = 0; i < index; i++) {
+        track.textContent += "✔\n"
     }
-    return code.join("\n")
+    if (index < code.split("\n").length) {
+        track.textContent += "▶"
+    }
 }
