@@ -19,6 +19,7 @@ def reset():
             "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
         ),
         "memory": render_template("render_memory.html", memory=controller.op.memory),
+        "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
     }
 
 
@@ -53,12 +54,13 @@ def run():
                     "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
                 ),
                 "memory": render_template("render_memory.html", memory=controller.op.memory),
+                "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
             }
 
         except Exception as e:
             print(e)
             return make_response(f"Exception raised {e}", 400)
-    return make_response("Record not found", 400)
+    return make_response("Controller not ready", 400)
 
 
 @app.route("/run-once", methods=["POST"])
@@ -69,16 +71,17 @@ def step():
         try:
             controller.run_once()
             return {
+                "index": controller._run_idx,
                 "registers_flags": render_template(
                     "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
                 ),
                 "memory": render_template("render_memory.html", memory=controller.op.memory),
+                "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
             }
-
         except Exception as e:
             print(e)
             return make_response(f"Exception raised {e}", 400)
-    return make_response("Record not found", 400)
+    return make_response("Controller not ready", 400)
 
 
 @app.route("/", methods=["GET"])

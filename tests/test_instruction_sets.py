@@ -55,9 +55,10 @@ def test_sta(controller):
 @pytest.mark.xfail()
 def test_db(controller):
     controller.reset()
+    _pc_counter = controller.op.super_memory.PC
     controller.parse("db 0x12")
     controller.run()
-    assert str(controller.op.memory_read(controller.op.super_memory.PC - 1)) == "0x12"
+    assert str(controller.op.memory_read(str(_pc_counter))) == "0x12"
 
 
 def test_add(controller):
@@ -128,14 +129,79 @@ def test_inx(controller):
     controller.parse("inx h")
     controller.run()
     assert str(controller.op.register_pair_read("H")) == "0x1565"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is False
+    assert controller.op.flags.CY is False
 
 
 def test_inr(controller):
+    """
+    B = 05H --> 06H
+    CY=no change | AC=0 | S=0 | P=1 | Z=0
+    """
     controller.reset()
-    controller.parse("mvi b, 0x15")
+    controller.parse("mvi b, 0x05")
     controller.parse("inr b")
     controller.run()
-    assert str(controller.op.memory_read("B")) == "0x16"
+    assert str(controller.op.memory_read("B")) == "0x06"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+    controller.reset()
+    controller.parse("mvi b, 0xff")
+    controller.parse("inr b")
+    controller.run()
+    assert str(controller.op.memory_read("B")) == "0x00"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is True
+    assert controller.op.flags.AC is True
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+
+def test_dcr(controller):
+    """
+    B = 45H --> 44H
+    CY=no change | AC=0 | S=0 | P=1 | Z=0
+    """
+    controller.reset()
+    controller.parse("dcr b")
+    controller.run()
+    assert str(controller.op.memory_read("B")) == "0xff"
+    assert controller.op.flags.S is True
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+    controller.reset()
+    controller.parse("mvi b, 0x45")
+    controller.parse("dcr b")
+    controller.run()
+    assert str(controller.op.memory_read("B")) == "0x44"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is True
+    assert controller.op.flags.P is True
+    assert controller.op.flags.CY is False
+
+
+def test_dcx(controller):
+    controller.reset()
+    controller.parse("lxi h, 0x1564")
+    controller.parse("dcx h")
+    controller.run()
+    assert str(controller.op.register_pair_read("H")) == "0x1563"
+    assert controller.op.flags.S is False
+    assert controller.op.flags.Z is False
+    assert controller.op.flags.AC is False
+    assert controller.op.flags.P is False
+    assert controller.op.flags.CY is False
 
 
 def test_lhld(controller):
@@ -162,8 +228,6 @@ def test_shld(controller):
     assert str(controller.op.register_pair_read("H")) == "0x4862"
     assert str(controller.op.memory_read("0x0700")) == "0x62"
     assert str(controller.op.memory_read("0x0701")) == "0x48"
-
-    print(controller.inspect())
 
 
 def test_xchg(controller):
@@ -198,30 +262,70 @@ def test_dad(controller):
     assert controller.op.flags.CY is False
 
 
-def test_jnc_nocarry(controller):
+@pytest.mark.parametrize("mem_acc, carry", [("0x14", True), ("0x18", False)])
+def test_jc(controller, mem_acc, carry):
     controller.reset()
-    controller.op.flags.CY = False
+    controller.op.flags.CY = carry
+    controller.parse("mvi a, 0x14")
+    controller.parse("jc down")
+    controller.parse("mvi a, 0x18")
+    controller.parse("down: mvi b, 0x21")
+    controller.run()
+
+    assert str(controller.op.memory_read("A")) == mem_acc
+    assert str(controller.op.memory_read("B")) == "0x21"
+
+    memos = [str(x).lower() for x in list(controller.op.memory.values())]
+    assert memos == [
+        "0x3e",
+        "0x14",
+        "0xda",
+        "0x07",
+        "0x08",
+        "0x3e",
+        "0x18",
+        "0x06",
+        "0x21",
+    ]
+
+
+@pytest.mark.parametrize("mem_acc, carry", [("0x14", False), ("0x18", True)])
+def test_jnc(controller, mem_acc, carry):
+    controller.reset()
+    controller.op.flags.CY = carry
     controller.parse("mvi a, 0x14")
     controller.parse("jnc down")
     controller.parse("mvi a, 0x18")
     controller.parse("down: mvi b, 0x21")
     controller.run()
 
-    assert str(controller.op.memory_read("A")) == "0x14"
+    assert str(controller.op.memory_read("A")) == mem_acc
     assert str(controller.op.memory_read("B")) == "0x21"
 
+    memos = [str(x) for x in list(controller.op.memory.values())]
+    assert memos == [
+        "0x3e",
+        "0x14",
+        "0xd2",
+        "0x07",
+        "0x08",
+        "0x3e",
+        "0x18",
+        "0x06",
+        "0x21",
+    ]
 
-def test_jnc_carry(controller):
+
+def test_jz(controller):
     controller.reset()
-    controller.op.flags.CY = True
-    controller.parse("mvi a, 0x14")
-    controller.parse("jnc down")
-    controller.parse("mvi a, 0x18")
-    controller.parse("down: mvi b, 0x21")
+    controller.parse("mvi a, 0x02")
+    controller.parse("LOOP: dcr a")
+    controller.parse("jnz LOOP")
     controller.run()
 
-    assert str(controller.op.memory_read("A")) == "0x18"
-    assert str(controller.op.memory_read("B")) == "0x21"
+    assert str(controller.op.memory_read("A")) == "0x00"
+    memo = [str(x).lower() for x in list(controller.op.memory.values())]
+    assert memo == ["0x3e", "0x02", "0x3d", "0xc2", "0x02", "0x08"]
 
 
 @pytest.mark.parametrize(

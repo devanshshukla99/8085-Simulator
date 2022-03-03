@@ -9,7 +9,7 @@ class Hex:
         self._bytes = _bytes
         self._base = 16
         self._format_spec = f"#0{2 + _bytes * 2}x"
-        self._format_spec_bin = f"#0{2 + _bytes * 4}b"
+        self._format_spec_bin = f"#0{2 + _bytes * 8}b"
         self._memory_limit_hex = "FF" * _bytes
         self._memory_limit = int(self._memory_limit_hex, self._base)
         self.data = data
@@ -250,6 +250,18 @@ class StackPointer(Byte):
         return True
 
 
+class ProgramCounter(Byte):
+    def __init__(self, memory, _bytes=2, *args, **kwargs) -> None:
+        super().__init__(_bytes=2, *args, **kwargs)
+        self.memory = memory
+        return
+
+    def write(self, data):
+        self.memory[self._data] = data
+        self.__next__()
+        return True
+
+
 class SuperMemory:
     def __init__(self) -> None:
         self.memory = Memory(65535, "0x0000")
@@ -260,7 +272,7 @@ class SuperMemory:
         self.DE = RegisterPair("D", "E")
         self.HL = RegisterPair("H", "L")
         self.SP = StackPointer(self.memory, "0xFFFF", _bytes=2)
-        self.PC = Byte(_bytes=2)
+        self.PC = ProgramCounter(self.memory)
         setattr(self.M.__func__, "read", lambda *args: self.memory[self.HL.read_pair()])
         setattr(self.M.__func__, "write", lambda data, *args: self.memory.write(self.HL.read_pair(), data))
 
@@ -292,11 +304,6 @@ class SuperMemory:
             "SP": f"{self.SP}",
             "PC": f"{self.PC}",
         }
-
-    def _update_pc(self, data):
-        self.memory[str(self.PC)] = data
-        next(self.PC)
-        return True
 
     def inspect(self):
         return "\n\n".join([self._reg_inspect(), str(self.memory.sort())])
