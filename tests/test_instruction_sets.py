@@ -55,9 +55,10 @@ def test_sta(controller):
 @pytest.mark.xfail()
 def test_db(controller):
     controller.reset()
+    _pc_counter = controller.op.super_memory.PC
     controller.parse("db 0x12")
     controller.run()
-    assert str(controller.op.memory_read(controller.op.super_memory.PC - 1)) == "0x12"
+    assert str(controller.op.memory_read(str(_pc_counter))) == "0x12"
 
 
 def test_add(controller):

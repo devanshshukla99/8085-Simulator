@@ -49,11 +49,11 @@ class Flags:
     def __repr__(self):
         return self.inspect()
 
+    def __getitem__(self, key):
+        return self._flags[key]
+
     def __setitem__(self, key, val):
         self._flags[key] = val
-
-    def _set_property(self, key):
-        return property(fget=lambda: self._flags.__getitem__(key), fset=lambda val: self._flags.__setitem__(key, val))
 
     def set_flags(self, flags_dict):
         for key, val in flags_dict.items():

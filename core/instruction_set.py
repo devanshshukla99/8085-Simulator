@@ -9,19 +9,16 @@ class Instructions:
         self._base = 16
         pass
 
-    def _set_opcode(self, func, opcodes):
-        return setattr(func.__func__, "opcodes", opcodes)
-
-    def _is_jump_opcode(self, opcode):
+    def _is_jump_opcode(self, opcode) -> bool:
         opcode = opcode.upper()
         if opcode not in ["JNC", "JC", "JZ", "JNZ"]:  # add more later
             return False
         return True
 
-    def _next_addr(self, addr):
+    def _next_addr(self, addr) -> str:
         return format(int(str(addr), 16) + 1, "#06x")
 
-    def _check_carry(self, data_1, data_2, og2, add=True, _AC=True, _CY=True):
+    def _check_carry(self, data_1, data_2, og2, add=True, _AC=True, _CY=True) -> None:
         """
         Method to check both `CY` and `AC` flags.
 
@@ -46,14 +43,9 @@ class Instructions:
             if int(str(data_1), 16) < int(str(og2), 16):
                 print("CARRY FLAG-")
                 flags.CY = True
-            return
-
-        # if (int(carry_data[0], 16) + int(carry_data[1], 16)) >= 16:
-        #     flags.CY = True
-        #     print("CARRY FLAG+")
         return
 
-    def _check_parity(self, data_bin: str):
+    def _check_parity(self, data_bin: str) -> None:
         flags.P = False
         _count_1s = data_bin.count("1")
         if not _count_1s % 2:
@@ -61,14 +53,14 @@ class Instructions:
             print("PARITY")
         return
 
-    def _check_sign(self, data_bin: str):
+    def _check_sign(self, data_bin: str) -> None:
         flags.S = False
         if int(data_bin[0]):
             flags.S = True
             print("SIGN")
         return
 
-    def _check_zero(self, result: str):
+    def _check_zero(self, result: str) -> None:
         flags.Z = False
         if int(result, 2) == 0:
             flags.Z = True
@@ -116,12 +108,12 @@ class Instructions:
         self.op.memory_write(addr, data)
         return True
 
-    def db(self, *args):
+    def db(self, *args) -> bool:
         """
         stores at current location
         """
         for x in args:
-            self.op._update_pc(x)
+            self.op.super_memory.PC.write(x)
         return True
 
     def add(self, to_addr, from_addr=None) -> bool:
@@ -164,7 +156,6 @@ class Instructions:
     def inr(self, addr) -> bool:
         data = self.op.memory_read(addr)
         data_to_write = self._check_flags_and_compute(data, "0x01", _CY=False)
-        #  = data + 1
         self.op.memory_write(addr, data_to_write)
         return True
 
@@ -173,7 +164,6 @@ class Instructions:
         The flags are not at all affected by the execution of this instruction.
         """
         data = self.op.register_pair_read(addr)
-        # data_to_write = self._check_flags_and_compute(data, "0x01")
         data_to_write = format(int(data, 16) + 1, "#06x")
         self.op.register_pair_write(addr, data_to_write)
         return True
@@ -189,7 +179,6 @@ class Instructions:
         The flags are not at all affected by the execution of this instruction.
         """
         data = self.op.register_pair_read(addr)
-        # data_to_write = self._check_flags_and_compute(data, "0x01", add=False)
         data_to_write = format(int(data, 16) - 1, "#06x")
         self.op.register_pair_write(addr, data_to_write)
         return True

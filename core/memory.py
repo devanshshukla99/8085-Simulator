@@ -272,7 +272,7 @@ class SuperMemory:
         self.DE = RegisterPair("D", "E")
         self.HL = RegisterPair("H", "L")
         self.SP = StackPointer(self.memory, "0xFFFF", _bytes=2)
-        self.PC = ProgramCounter(self.memory)  # Byte(_bytes=2)
+        self.PC = ProgramCounter(self.memory)
         setattr(self.M.__func__, "read", lambda *args: self.memory[self.HL.read_pair()])
         setattr(self.M.__func__, "write", lambda data, *args: self.memory.write(self.HL.read_pair(), data))
 
@@ -304,13 +304,6 @@ class SuperMemory:
             "SP": f"{self.SP}",
             "PC": f"{self.PC}",
         }
-
-    def _update_pc(self, data):
-        # self.memory[str(self.PC)] = data
-        # next(self.PC)
-        # return True
-        self.PC.write(data)
-        return True
 
     def inspect(self):
         return "\n\n".join([self._reg_inspect(), str(self.memory.sort())])
