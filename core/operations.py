@@ -2,7 +2,7 @@ from core.exceptions import OPCODENotFound, SyntaxError
 from core.flags import flags
 from core.memory import Byte, SuperMemory
 from core.opcodes import opcodes_lookup
-from core.util import decompose_byte, ishex
+from core.util import decompose_byte, ishex, tohex
 
 
 class Operations:
@@ -62,7 +62,7 @@ class Operations:
 
     def _opcode_fetch(self, opcode, *args, **kwargs) -> None:
         _args_params = [x for x in args if self.iskeyword(x)]
-        _args_hexs = [decompose_byte(x) for x in args if ishex(x)]
+        _args_hexs = [decompose_byte(tohex(x)) for x in args if ishex(x)]
         _opcode_search_params = " ".join([opcode, *_args_params]).upper()
         _opcode_hex = self._lookup_opcodes_dir.get(_opcode_search_params)
         if _opcode_hex:
