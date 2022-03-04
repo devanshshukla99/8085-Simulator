@@ -7,7 +7,7 @@ from core.exceptions import OPCODENotFound
 from core.flags import JumpFlag
 from core.instruction_set import Instructions
 from core.operations import Operations
-from core.util import decompose_byte
+from core.util import decompose_byte, ishex, tohex
 
 
 class Controller:
@@ -112,6 +112,9 @@ class Controller:
         return self._callstack
 
     def _addjob(self, opcode: str, func, args: tuple = (), kwargs: dict = {}) -> bool:
+        for idx, val in enumerate(args):
+            if ishex(val):
+                args[idx] = tohex(val)
         self._callstack.append((opcode, func, args, kwargs))
         return True
 
@@ -145,7 +148,6 @@ class Controller:
         opcode_func = self._lookup_opcode_func(opcode)
         self._addjob(opcode, opcode_func, args, kwargs)
         self.op.prepare_operation(command, opcode, *args)
-
         """
         JNC ZO      ----   Target label
         ...
