@@ -97,6 +97,7 @@ class Controller:
                 self.op._assembler[_target_label._command] = " ".join(
                     [_assembler, _data_to_write[1], _data_to_write[0]]
                 )
+        return
 
     def inspect(self):
         return self.console.print(self.__repr__())
@@ -152,7 +153,8 @@ class Controller:
         ZO: ...     ----    Label
 
 
-        The function should execute at both commands; if `target-label` or `label` then look for `target-label` and `label`;
+        The function should execute at both commands; if `target-label` or `label` then look for
+        `target-label` and `label`;
         if `target-lable` is found then replace the placeholder obtained using the `PC` in `label`
         """
         _label = kwargs.get("target-label", kwargs.get("label", None))
@@ -200,8 +202,9 @@ class Controller:
     def set_flags(self, *args, **kwargs):
         return self.op.flags.set_flags(*args, **kwargs)
 
-    def reset(self) -> None:
-        return self.__init__(console=self.console)
+    def reset(self) -> bool:
+        self.__init__(console=self.console)
+        return True
 
     def reset_callstack(self) -> None:
         self._callstack = []

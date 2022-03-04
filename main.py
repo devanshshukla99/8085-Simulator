@@ -26,6 +26,8 @@ Control unit
 I/O
 """
 
+import textwrap
+
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
@@ -62,16 +64,13 @@ def run(filename):
                 continue
             elif command == "quit" or command == "exit":
                 exit(-1)
-            # elif command[0] == "/":
-            #     if command == "/c" or command == "/inspect":
-            #         console.print(controller.op.inspect())
-            #         continue
-            #     else:
-            #         # ! REMOVE THIS LATER
-            #         console.print(eval(command[1:]))
+            elif command[0] == "/":
+                command = command[1:]
+                if hasattr(controller, command):
+                    console.log(getattr(controller, command)())
             else:
                 try:
-                    controller.parse_and_call(command)
+                    controller.parse(command)
                 except OPCODENotFound:
                     console.print_exception(extra_lines=2)
     except KeyboardInterrupt:
@@ -93,6 +92,19 @@ def main():
     # with Live(prompt, console=console) as live:
     controller = Controller()
 
+    console.log(
+        textwrap.dedent(
+            """
+            Input>: COMMANDS
+            COMMANDS can be:
+                /inspect = inpect the memory and registers
+                /run = run
+                /reset = reset
+                [red]OR[/]
+                ANY 8085 INSTRUCTION -- example `mvi a, 0x12` etc.
+            """
+        )
+    )
     while True:
         try:
             command = prompt.ask("[bold][red]Input>[/]")
@@ -100,16 +112,15 @@ def main():
                 continue
             elif command == "quit" or command == "exit":
                 exit(-1)
-            # elif command[0] == "/":
-            #     if command == "/c" or command == "/inspect":
-            #         console.print(controller.op.inspect())
-            #         continue
-            #     else:
-            #         # ! REMOVE THIS LATER
-            #         console.print(eval(command[1:]))
+            elif command[0] == "/":
+                command = command[1:]
+                if hasattr(controller, command):
+                    console.log(getattr(controller, command)())
+                else:
+                    console.log("instruction not found")
             else:
                 try:
-                    controller.parse_and_call(command)
+                    controller.parse(command)
                 except OPCODENotFound:
                     console.print_exception(extra_lines=2)
         except KeyboardInterrupt:

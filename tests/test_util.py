@@ -1,6 +1,6 @@
-from pickletools import pybytes_or_str, pyset
 import pytest
-from core.util import comparehex, twos_complement, construct_hex, decompose_byte, get_bytes, ishex, sanatize_hex
+
+from core.util import comparehex, construct_hex, decompose_byte, get_bytes, ishex, sanatize_hex, twos_complement
 
 
 @pytest.mark.parametrize(
