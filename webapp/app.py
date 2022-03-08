@@ -84,6 +84,33 @@ def step():
     return make_response("Controller not ready", 400)
 
 
+@app.route("/memory-edit", methods=["POST"])
+def update_memory():
+    global controller
+    mem_data = request.data
+    if mem_data:
+        mem_data = json.loads(mem_data)
+        print(mem_data)
+        try:
+            for memloc, memdata in mem_data:
+                print("=============================")
+                print(memloc, memdata)
+                controller.op.memory_write(memloc, memdata)
+
+            return {
+                "index": controller._run_idx,
+                "registers_flags": render_template(
+                    "render_registers_flags.html", registers=controller.op.super_memory._registers_todict(), flags=flags
+                ),
+                "memory": render_template("render_memory.html", memory=controller.op.memory),
+                "assembler": render_template("render_assembler.html", assembler=controller.op._assembler),
+            }
+        except Exception as e:
+            print(e)
+            return make_response(f"Exception raised {e}", 400)
+    return make_response("Controller not ready", 400)
+
+
 @app.route("/", methods=["GET"])
 def main():
     global controller

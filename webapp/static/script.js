@@ -103,6 +103,33 @@ window.onload = function () {
         };
         request.send();
     });
+
+    // memory-edit EventListener
+    document.getElementById("memory_edit_input").addEventListener("keyup", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            _mem_edit = ProcessMemEdit(event.target.value)
+            if (!_mem_edit) {
+                alert("invalid")
+            }
+            const request = new XMLHttpRequest();
+            request.open("POST", `/memory-edit`);
+            request.onload = () => {
+                const response = request.responseText;
+                if (request.status != 200) {
+                    alert(response)
+                }
+                else {
+                    const _resp_dict = JSON.parse(response)
+                    index = _resp_dict["index"];
+                    document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
+                    document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
+                    document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
+                }
+            }
+            request.send(JSON.stringify(_mem_edit));
+        }
+    });
 }
 
 function GetFlags() {
@@ -128,4 +155,40 @@ function ProgressSideBar(code, index) {
     if (index < code.split("\n").length) {
         track.textContent += "▶"
     }
+}
+function ParseHex(data) {
+    if (data.match("0[x|X][a-fA-F0-9]+")) {
+        return data
+    }
+    else if (data.match("[a-fA-F0-9]+H$")) {
+        _match = data.match("[a-fA-F0-9]+")[0]
+        return "0x" + _match
+    }
+    return "0x" + data
+}
+function ProcessMemEdit(data) {
+    // check if range => randomize
+    if (data.includes(":")) {
+        data = data.split(":")
+        _data = []
+        for (let i = 0; i < data.length; i++) {
+            data[i] = ParseHex(data[i])
+        }
+        start = parseInt(data[0])
+        end = parseInt(data[1])
+
+        idx = 0
+        for (let i = start; i <= end; i++) {
+            _data[idx++] = ["0x" + i.toString(16), "0x" + parseInt(Math.random() * 255).toString(16)]
+        }
+        return _data
+    }
+    else if (!data.includes("=")) {
+        return false
+    }
+    data = data.split("=")
+    for (let i = 0; i < data.length; i++) {
+        data[i] = ParseHex(data[i])
+    }
+    return [data]
 }

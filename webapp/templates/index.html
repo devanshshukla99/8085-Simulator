@@ -32,5 +32,10 @@
     <div class="assembler-container text-white w-50" style="grid-area: e" id="assembler-container">
         {% include "render_assembler.html" %}
     </div>
+    <div class="memory-edit-container" style="grid-area: f;">
+        <input class="memory-edit bg-dark text-white border-secondary" placeholder="edit addr(eg.0800H=12H)"
+            id="memory_edit_input" autocomplete="new-password">
+    </div>
+
 </div>
 {% endblock %}
