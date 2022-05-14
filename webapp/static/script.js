@@ -50,7 +50,7 @@ window.onload = function () {
                 document.getElementById("registers-flags").innerHTML = _resp_dict["registers_flags"];
                 document.getElementById("memory-container").innerHTML = _resp_dict["memory"];
                 document.getElementById("assembler-container").innerHTML = _resp_dict["assembler"];
-                ProgressSideBar(_code, _code.split("\n").length)
+                ProgressSideBar(_code, _code.split("\n").filter(Boolean).length)
             }
         };
         var _code = document.getElementById("code").value.trim();
@@ -130,6 +130,10 @@ window.onload = function () {
             request.send(JSON.stringify(_mem_edit));
         }
     });
+    var footer = document.querySelector("header");
+    if (footer) {
+        footer.innerHTML = ``
+    }
 }
 
 function GetFlags() {
@@ -147,12 +151,19 @@ function AlertProgressSideBar() {
 }
 function ProgressSideBar(code, index) {
     var track = document.getElementById("track");
-    console.log(index, code, code.split("\n").length)
+    code_split = code.split("\n")
+    console.log(index, code, code_split.length)
     track.textContent = ""
     for (let i = 0; i < index; i++) {
+        if (code_split[i] === "") {
+            console.log("skip `" + code_split[i] + "`", i)
+            i += 1
+            track.textContent += "\n"
+        }
         track.textContent += "✔\n"
+        console.log(i, code_split[i])
     }
-    if (index < code.split("\n").length) {
+    if (index < code_split.length) {
         track.textContent += "▶"
     }
 }

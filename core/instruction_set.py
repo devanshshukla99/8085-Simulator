@@ -1,3 +1,4 @@
+import warnings
 from core.flags import flags
 from core.util import decompose_byte, twos_complement
 
@@ -302,6 +303,34 @@ class Instructions:
         rolled_data_bin = "".join(rolled_data_bin)
         data_new = format(int(rolled_data_bin, 2), "#02x")
         self.op.memory_write("A", data_new)
+        return True
+
+    def cmp(self, addr) -> bool:
+        """
+        CoMPareAccumulator
+        CMP is same as SUB except it doesn't save the result!
+
+        CMP R; R = A, B, C, D, E, H, L, or M
+
+        A < R --> `CY` is set; `Z is reset
+        A = R --> `CY` is reset; `Z` is set
+        A > R --> `CY` and `Z` are reset
+
+        ** Check the condition of other flags in this instruction **
+        """
+        warnings.warn("** Check the condition of other flags in this instruction **")
+        data_1 = self.op.memory_read("A")
+        data_2 = self.op.memory_read(addr)
+
+        if int(str(data_1), 16) > int(str(data_2), 16):
+            flags.CY = True
+            flags.Z = False
+        elif int(str(data_1), 16) < int(str(data_2), 16):
+            flags.CY = False
+            flags.Z = False
+        else:
+            flags.CY = False
+            flags.Z = True
         return True
 
     def push(self, addr) -> bool:

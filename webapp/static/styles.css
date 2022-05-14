@@ -1,6 +1,7 @@
 * {
     margin: 0px;
     padding: 0px;
+    color: white;
 }
 .main {
     margin-left: 1rem;
@@ -10,7 +11,7 @@
     gap: 10px;
     grid-auto-rows: 100px;
     grid-template-areas:
-      "a d d d d c "
+      "a d d d d f"
       "a d d d d c"
       "b d d d d c"
       "b e e e e c";
@@ -26,9 +27,6 @@ table {
 .memory-container {
     padding: 1rem;
     text-align: center;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
     height: 80vh;
     width: 250px;
     overflow-y: auto;
@@ -66,7 +64,7 @@ table {
 .code-box {
     outline: 0px;
     white-space: break-spaces;
-    min-height: 400px;
+    min-height: 600px;
     resize: none;
     width: 100%;
 }
@@ -77,4 +75,40 @@ textarea {
 }
 textarea:focus-visible{
     outline: 0px;
+}
+.memory-edit-container {
+    display: flex;
+    height: 10%;
+    justify-content: space-around;
+}
+.memory-edit {
+    padding: 1rem;
+    border-radius: 50px;
+    border: 1px solid aqua !important;
+}
+.memory-edit-container input:focus {
+    outline: none;
+}
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgb(0, 0, 0, 0.3);
+}
+.header {
+    padding-left: 1rem;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: flex-start;
+}
+.header a {
+    color: #777;
+    margin-top: -0.3em;
+    display: block;
+    text-decoration: none;
+}
+.header a:hover {
+    color: rgb(10, 96, 255);
+    text-decoration: none;
 }
