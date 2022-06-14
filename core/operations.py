@@ -60,7 +60,7 @@ class Operations:
     def _parse_addr(self, addr: str):
         """
         Method to parse an address
-        
+
         Parameters
         ----------
         addr : `str`
@@ -72,7 +72,7 @@ class Operations:
     def _get_register(self, addr: str):
         """
         Returns the register from `addr`
-        
+
         Parameters
         ----------
         addr : `str`
@@ -103,7 +103,7 @@ class Operations:
     def prepare_operation(self, command: str, opcode: str, *args, **kwargs) -> bool:
         """
         Method to prepare the upcoming instruction, i.e. opcode fetch, assembler output etc.
-        
+
         Parameters
         ----------
         command : `str`
@@ -157,7 +157,7 @@ class Operations:
     def register_pair_read(self, addr) -> Byte:
         """
         Method to read and return the data of the register pair pointed by `addr`
-        
+
         Parameters
         ----------
         addr : `str`
@@ -171,7 +171,7 @@ class Operations:
     def register_pair_write(self, addr, data) -> bool:
         """
         Method to write the data of the register pair pointed by `addr`
-        
+
         Parameters
         ----------
         addr : `str`

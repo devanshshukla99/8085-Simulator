@@ -1,7 +1,7 @@
 import re
 
 
-def twos_complement(num: str, _base: int=16) -> str:
+def twos_complement(num: str, _base: int = 16) -> str:
     """
     Helper function to compure 2's complement of a hex value.
 
@@ -70,7 +70,7 @@ def sanatize_hex(data: str) -> str:
     return data.replace("0x", "").replace("0X", "")
 
 
-def decompose_byte(data: str, nibble:bool=False) -> list:
+def decompose_byte(data: str, nibble: bool = False) -> list:
     """
     Helper function to decompose hex into bytes/nibbles
 
@@ -94,7 +94,7 @@ def decompose_byte(data: str, nibble:bool=False) -> list:
 def get_bytes(data: str) -> int:
     """
     Helper function to get the # of bytes in the hex.
-    
+
     Parameters
     ----------
     data : `str`
@@ -103,7 +103,7 @@ def get_bytes(data: str) -> int:
     return int(len(sanatize_hex(data)) / 2)
 
 
-def construct_hex(hex1: str, hex2: str, _bytes: int=2) -> str:
+def construct_hex(hex1: str, hex2: str, _bytes: int = 2) -> str:
     """
     Helper method to construct hex from two decomposed hex values.
 
