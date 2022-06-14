@@ -95,29 +95,74 @@ class Instructions:
         self._check_flags(data_bin, _P=_P, _S=_S, _Z=_Z)
         return result_hex
 
-    def mvi(self, addr, data) -> bool:
+    def mvi(self, addr: str, data: str) -> bool:
+        """
+        MoVe Immediate
+
+        Store the immediate `data` into `addr`
+
+        Parameters
+        ----------
+        addr : `str`
+            Address
+        data : `str`
+            Data
+        """
         self.op.memory_write(addr, data)
         return True
 
-    def mov(self, to_addr, from_addr) -> bool:
+    def mov(self, to_addr: str, from_addr: str) -> bool:
+        """
+        MOVe data `from_addr` to `to_addr`
+
+        Parameters
+        ----------
+        to_addr : `str`
+            To address
+        from_addr : `str`
+            From address
+        """
         data = self.op.memory_read(from_addr)
         self.op.memory_write(to_addr, data)
         return True
 
-    def sta(self, addr) -> bool:
+    def sta(self, addr: str) -> bool:
+        """
+        STore Accumulator
+
+        Parameters
+        ----------
+        addr : `str`
+            store the accumulator data in `addr`
+        """
         data = self.op.memory_read("A")
         self.op.memory_write(addr, data)
         return True
 
     def db(self, *args) -> bool:
         """
-        stores at current location
+        Directive to store the data at address location pointed by the ``PC``
+
+        Parameters
+        ----------
+        *args : `tuple`
         """
         for x in args:
             self.op.super_memory.PC.write(x)
         return True
 
     def add(self, to_addr, from_addr=None) -> bool:
+        """
+        Adds `to_addr` with `from_addr`
+
+        Parameters
+        ----------
+        from_addr : `str`
+            From address
+
+        to_addr : `str`
+            To address
+        """
         if not from_addr:
             from_addr = to_addr
             to_addr = "A"
@@ -127,7 +172,18 @@ class Instructions:
         self.op.memory_write(to_addr, data)
         return True
 
-    def sub(self, from_addr, to_addr=None) -> bool:
+    def sub(self, from_addr: str, to_addr: str = None) -> bool:
+        """
+        Subtracts `to_addr` from `from_addr` with Borrow
+
+        Parameters
+        ----------
+        from_addr : `str`
+            From address
+
+        to_addr : `str`
+            To address
+        """
         if not to_addr:
             to_addr = from_addr
             from_addr = "A"
@@ -137,7 +193,18 @@ class Instructions:
         self.op.memory_write(from_addr, result_data)
         return True
 
-    def sbb(self, from_addr, to_addr=None) -> bool:
+    def sbb(self, from_addr: str, to_addr: str = None) -> bool:
+        """
+        Subtracts `to_addr` from `from_addr` with Borrow
+
+        Parameters
+        ----------
+        from_addr : `str`
+            From address
+
+        to_addr : `str`
+            To address
+        """
         if not to_addr:
             to_addr = from_addr
             from_addr = "A"
@@ -151,17 +218,40 @@ class Instructions:
         return True
 
     def lxi(self, addr, data) -> bool:
+        """
+        Load eXtended register
+
+        Parameters
+        ----------
+        addr : `str`
+        data : `str`
+        """
         self.op.register_pair_write(addr, data)
         return True
 
-    def inr(self, addr) -> bool:
+    def inr(self, addr: str) -> bool:
+        """
+        InCrement Register
+
+        Parameters
+        ----------
+        addr : `str`, `hex`
+        """
         data = self.op.memory_read(addr)
         data_to_write = self._check_flags_and_compute(data, "0x01", _CY=False)
         self.op.memory_write(addr, data_to_write)
         return True
 
-    def inx(self, addr) -> bool:
+    def inx(self, addr: str) -> bool:
         """
+        InCrement eXtended register
+
+        Parameters
+        ----------
+        addr : `str`
+
+        Note
+        ----
         The flags are not at all affected by the execution of this instruction.
         """
         data = self.op.register_pair_read(addr)
@@ -169,14 +259,28 @@ class Instructions:
         self.op.register_pair_write(addr, data_to_write)
         return True
 
-    def dcr(self, addr) -> bool:
+    def dcr(self, addr: str) -> bool:
+        """
+        DeCrement Register
+
+        Parameters
+        ----------
+        addr : `str`, `hex`
+        """
         data = self.op.memory_read(addr)
         data_to_write = self._check_flags_and_compute(data, "0x01", add=False, _CY=False)
         self.op.memory_write(addr, data_to_write)
         return True
 
-    def dcx(self, addr) -> bool:
+    def dcx(self, addr: str) -> bool:
         """
+        DeCrement eXtended register
+        Decrements the `addr` register pair.
+
+        Parameters
+        ----------
+        addr : `str`, (`B`, `D`, `H`)
+
         The flags are not at all affected by the execution of this instruction.
         """
         data = self.op.register_pair_read(addr)
@@ -184,7 +288,14 @@ class Instructions:
         self.op.register_pair_write(addr, data_to_write)
         return True
 
-    def lhld(self, addr) -> bool:
+    def lhld(self, addr: str) -> bool:
+        """
+        Loads the data from `addr` into HL pair.
+
+        Parameters
+        ----------
+        addr : `str`, hex
+        """
         data_1 = self.op.memory_read(addr)
         nxt_addr = format(int(addr, 16) + 1, "#06x")
         data_2 = self.op.memory_read(nxt_addr)
@@ -193,15 +304,27 @@ class Instructions:
         return True
 
     def xchg(self, *args) -> bool:
+        """
+        eXChanGes the data stored in HL and DE pairs.
+        """
         data_1 = self.op.register_pair_read("H")
         data_2 = self.op.register_pair_read("D")
         self.op.register_pair_write("D", data_1)
         self.op.register_pair_write("H", data_2)
         return True
 
-    def dad(self, addr) -> bool:
+    def dad(self, addr: str) -> bool:
         """
+        Adds the HL and `addr` pair and store the result in HL.
+
+        Parameters
+        ----------
+        addr : `str` (rp, `B`, `D`, `H`)
+
+        Note
+        ----
         `DAD` only affects the `CY` flag
+
         """
         data_1 = self.op.register_pair_read(addr)
         data_2 = self.op.register_pair_read("H")
@@ -217,30 +340,50 @@ class Instructions:
         return True
 
     def jnc(self, label, *args, **kwargs) -> bool:
+        """
+        Jump if Not Carry
+        """
         bounce_to_label = kwargs.get("bounce_to_label")
         if not flags.CY:
             return bounce_to_label(label)
         return True
 
     def jc(self, label, *args, **kwargs) -> bool:
+        """
+        Jump if Carry
+        """
         bounce_to_label = kwargs.get("bounce_to_label")
         if flags.CY:
             return bounce_to_label(label)
         return True
 
     def jz(self, label, *args, **kwargs) -> bool:
+        """
+        Jump if Zero
+        """
         bounce_to_label = kwargs.get("bounce_to_label")
         if flags.Z:
             return bounce_to_label(label)
         return True
 
     def jnz(self, label, *args, **kwargs) -> bool:
+        """
+        Jump if Not Zero
+        """
         bounce_to_label = kwargs.get("bounce_to_label")
         if not flags.Z:
             return bounce_to_label(label)
         return True
 
-    def shld(self, addr) -> bool:
+    def shld(self, addr: str) -> bool:
+        """
+        Store HL pair data
+
+        Parameters
+        ----------
+        addr : `str`
+            Address
+        """
         data_1 = self.op.memory_read("H")
         data_2 = self.op.memory_read("L")
         self.op.memory_write(addr, data_2)
@@ -248,9 +391,14 @@ class Instructions:
         self.op.memory_write(nxt_addr, data_1)
         return True
 
-    def ora(self, addr) -> bool:
+    def ora(self, addr: str) -> bool:
         """
         OR logical instruction
+
+        Parameters
+        ----------
+        addr : `str`
+            Address
         """
         data_1 = int(self.op.memory_read("A"))
         data_2 = int(self.op.memory_read(addr))
@@ -317,6 +465,11 @@ class Instructions:
         A > R --> `CY` and `Z` are reset
 
         ** Check the condition of other flags in this instruction **
+
+        Parameters
+        ----------
+        addr : `str`
+            Address
         """
         warnings.warn("** Check the condition of other flags in this instruction **")
         data_1 = self.op.memory_read("A")
@@ -333,19 +486,32 @@ class Instructions:
             flags.Z = True
         return True
 
-    def push(self, addr) -> bool:
+    def push(self, addr: str) -> bool:
         """
-        addd: register pair
         PUSH rp
         rp = BC, DE, HL, or PSW
+
+        Pushs the register pair into the stack.
+
+        Parameters
+        ----------
+        addr : `str`
+            Address
         """
         data_1 = self.op.register_pair_read(addr)
         return self.op.super_memory.SP.write(data_1)
 
-    def pop(self, addr) -> bool:
+    def pop(self, addr: str) -> bool:
         """
         POP rp
         rp = BC, DE, HL, or PSW
+
+        Pushs a register pair from the stack and store it in `addr`
+
+        Parameters
+        ----------
+        addr : `str`
+            Address
         """
         data_1 = self.op.super_memory.SP.read()
         return self.op.register_pair_write(addr, data_1)

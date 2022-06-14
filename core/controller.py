@@ -1,6 +1,7 @@
 import re
 import inspect
 
+from typing import List
 from rich.console import Console
 
 from core.exceptions import OPCODENotFound
@@ -11,7 +12,14 @@ from core.util import decompose_byte, ishex, tohex
 
 
 class Controller:
-    def __init__(self, console=None) -> None:
+    def __init__(self, console: Console = None) -> None:
+        """
+        Controls the callstack and memory.
+
+        Parameters
+        ----------
+        console : `~rich.console.Console`
+        """
         self.console = console
         if not console:
             self.console = Console()
@@ -41,17 +49,13 @@ class Controller:
         return f"<CallStack calls={len(self._callstack)}>"
 
     def _wrap_bounceable_methods(self):
-        """
-        Wrap the jump-ing methods with `Controller._skipper`
-        """
+        """Wrap the jump-ing methods with `Controller._skipper`"""
         for key in self._jump_methods:
             self.lookup[key] = self._skipper(self.lookup.get(key))
         return True
 
     def _skipper(self, func):
-        """
-        Wrapper for jump-ing methods
-        """
+        """Wrapper for jump-ing methods"""
 
         def _func(*args, **kwargs):
             kwargs["bounce_to_label"] = self._bounce_to_label
@@ -59,7 +63,7 @@ class Controller:
 
         return _func
 
-    def _bounce_to_label(self, label):
+    def _bounce_to_label(self, label: str):
         idx, _ = self._locate_jump_label(label)
         print(f"JUMPING to {idx}")
         self._run_idx = idx
@@ -71,7 +75,7 @@ class Controller:
     def _get_jump_flags(self) -> list:
         return [x[2] for x in self._callstack if x[2]]
 
-    def _locate_jump_label(self, label, key="label") -> tuple:
+    def _locate_jump_label(self, label: str, key: str = "label") -> tuple:
         label = label.upper()
         for idx, x in enumerate(self._callstack):
             key_label = x[3].get(key, None)
@@ -80,7 +84,7 @@ class Controller:
                     return idx, x
         return None, None
 
-    def _target_label(self, label) -> bool:
+    def _target_label(self, label: str) -> bool:
         print(f"======={label}========")
         idx_t, x_t = self._locate_jump_label(label, key="target-label")
         idx_l, x_l = self._locate_jump_label(label)
@@ -102,7 +106,7 @@ class Controller:
     def inspect(self):
         return self.console.print(self.__repr__())
 
-    def _lookup_opcode_func(self, opcode):
+    def _lookup_opcode_func(self, opcode: str):
         func = self.lookup.get(opcode)
         if func:
             return func
@@ -139,7 +143,14 @@ class Controller:
         args = _proc_command[1:]
         return opcode.upper(), args, kwargs
 
-    def parse(self, command):
+    def parse(self, command: str):
+        """
+        Parse the incoming command into labels, opcode, data
+
+        Parameters
+        ----------
+        command : `str`
+        """
         self.console.log(command)
         opcode, args, kwargs = self._parser(command)
         if self.instruct_set._is_jump_opcode(opcode):
@@ -155,8 +166,7 @@ class Controller:
         ZO: ...     ----    Label
 
 
-        The function should execute at both commands; if `target-label` or `label` then look for
-        `target-label` and `label`;
+        The method should execute at both commands; if `target-label` or `label` then look for `target-label` and `label`;
         if `target-lable` is found then replace the placeholder obtained using the `PC` in `label`
         """
         _label = kwargs.get("target-label", kwargs.get("label", None))
@@ -166,13 +176,21 @@ class Controller:
         self.ready = True
         return True
 
-    def parse_all(self, commands):
+    def parse_all(self, commands: List[str]):
+        """
+        Wrapper for `Controller.parser` to parse multiple commands at-once.
+
+        Parameters
+        ----------
+        commands : `list`
+        """
         for command in commands.split("\n"):
             if command:
                 self.parse(command)
         return True
 
     def run_once(self):
+        """Method to run a simple intruction from the callstack."""
         if self._run_idx >= len(self._callstack):
             return False
         try:
@@ -186,6 +204,7 @@ class Controller:
         return True
 
     def run(self):
+        """Method to run the callstack."""
         while self._run_idx < len(self._callstack):
             val = self._callstack[self._run_idx]
             self._run_idx += 1
@@ -198,17 +217,29 @@ class Controller:
         return True
 
     def set_flag(self, key, val):
+        """
+        Sets flag `key` to `val`
+
+        Parameters
+        ----------
+        key : `str`
+            Flag name i.e. CY, AC, S, Z, P
+        val : `bool`
+        """
         self.op.flags[key] = val
         return True
 
     def set_flags(self, *args, **kwargs):
+        """Wrapper for `Controller.set_flag` to set multiple flags at-once"""
         return self.op.flags.set_flags(*args, **kwargs)
 
     def reset(self) -> bool:
+        """Method to reset the Controller."""
         self.__init__(console=self.console)
         return True
 
     def reset_callstack(self) -> None:
+        """Method to reset callstack."""
         self._callstack = []
         self._run_idx = 0
         self.op._assembler = {}
