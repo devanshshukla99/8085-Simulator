@@ -5,7 +5,17 @@ from core.exceptions import InvalidMemoryAddress, MemoryLimitExceeded
 
 
 class Hex:
-    def __init__(self, data: str = "0x00", _bytes: str = 1, *args, **kwargs) -> None:
+    def __init__(self, data: str = "0x00", _bytes: int = 1, *args, **kwargs) -> None:
+        """
+        Implements the idea of a Hexadecimal with additional methods.
+
+        Parameters
+        ----------
+        data : `str`, optional
+            Defaults to `0x00`
+        _bytes : `int`, optional
+            Defaults to `1`
+        """
         self._bytes = _bytes
         self._base = 16
         self._format_spec = f"#0{2 + _bytes * 2}x"
@@ -49,12 +59,20 @@ class Hex:
         return self._bytes
 
     def _verify(self, value: str):
+        """
+        Verifies if the `hex` val is in correct format.
+
+        Parameters
+        ----------
+        value : `str`
+        """
         if not re.fullmatch("^0[x|X][0-9a-fA-F]+", str(value)):
             raise InvalidMemoryAddress()
         if int(str(value), self._base) > self._memory_limit:
             raise MemoryLimitExceeded()
 
     def bin(self) -> str:
+        """Returns the binary value of the instantiated hex"""
         return format(int(self._data, self._base), self._format_spec_bin)
 
     @property
@@ -68,22 +86,35 @@ class Hex:
         return
 
     def read(self, *args, **kwargs) -> str:
+        """Returns the hex value"""
         return self
 
     def write(self, val: str, *args, **kwargs) -> bool:
+        """
+        Updates the current hex-data
+
+        Parameters
+        ----------
+        val : `str`
+            Hex data
+        """
         self.data = val
         return True
 
     def update(self, val: str, *args, **kwargs) -> bool:
+        """Wrapper for `Hex.write`"""
         return self.write(val, *args, **kwargs)
 
     def replace(self, *args, **kwargs) -> None:
+        """Wrapper for `str.replace`"""
         return self._data.replace(*args, **kwargs)
 
     def lower(self, *args, **kwargs):
+        """Wrapper for `str.lower`"""
         return self._data.lower(*args, **kwargs)
 
     def upper(self, *args, **kwargs):
+        """Wrapper for `str.upper`"""
         return self._data.upper(*args, **kwargs)
 
     pass
@@ -91,13 +122,30 @@ class Hex:
 
 class Byte(Hex):
     def __init__(self, *args, **kwargs) -> None:
+        """
+        Child class for byte instantiation.
+        """
         super().__init__(*args, **kwargs)
 
     pass
 
 
 class Memory(dict):
-    def __init__(self, memory_size=65535, starting_address="0x0000", _bytes=2, *args, **kwargs) -> None:
+    def __init__(
+        self, memory_size: int = 65535, starting_address: str = "0x0000", _bytes: int = 2, *args, **kwargs
+    ) -> None:
+        """
+        Implements the memory as a dict of address and data.
+
+        Parameters
+        ----------
+        memory_size : `int`, optional
+            Defaults to 65535.
+        starting_address : `str`, optional
+            Defaults to "0x0000".
+        _bytes : `int`
+            # of bytes per address, default to 2.
+        """
         super().__init__(*args, **kwargs)
         self._bytes = 1
         self._base = 16
@@ -124,6 +172,13 @@ class Memory(dict):
         return super().__getitem__(addr).write(value)
 
     def _verify(self, value: str) -> None:
+        """
+        Verifies if the `value` is in correct hex format
+
+        Parameters
+        ----------
+        value : `str`
+        """
         if not re.fullmatch("^0[x|X][0-9a-fA-F]+", str(value)):
             raise InvalidMemoryAddress()
         if int(str(value), self._base) > self._memory_limit:
@@ -131,19 +186,30 @@ class Memory(dict):
         return format(int(value, self._base), self._format_spec)
 
     def sort(self):
+        """Sortes the dictionary"""
         return dict(sorted(self.items(), key=lambda x: int(str(x[0]), 16)))
 
     def read(self, *args, **kwargs):
+        """Wrapper for `dict.__getitem__`"""
         return self.__getitem__(*args, **kwargs)
 
     def write(self, *args, **kwargs):
+        """Wrapper for `dict.__setitem__`"""
         return self.__setitem__(*args, **kwargs)
 
     pass
 
 
 class RegisterPair:
-    def __init__(self, reg_1, reg_2, *args, **kwargs):
+    def __init__(self, reg_1: str, reg_2: str, *args, **kwargs):
+        """
+        Implements the RegisterPairs using `Byte`
+
+        Parameters
+        ----------
+        reg_1 : str
+        reg_2 : str
+        """
         super().__init__(*args, **kwargs)
         self._reg_1 = reg_1
         self._reg_2 = reg_2
@@ -167,19 +233,42 @@ class RegisterPair:
     def __repr__(self):
         return f"{self._registers.get(self._reg_1)} {self._registers.get(self._reg_2)}"
 
-    def read(self, addr) -> Byte:
+    def read(self, addr: str) -> Byte:
+        """
+        Reads the individual register `addr`
+
+        Parameters
+        ----------
+        addr : `str`
+        """
         return self._registers.get(str(addr).upper())
 
     def read_pair(self) -> str:
+        """Returns the register pair"""
         bin1 = format(int(str(self._registers.get(self._reg_1).read()), self._base), f"0{self._bytes * 4}b")
         bin2 = format(int(str(self._registers.get(self._reg_2).read()), self._base), f"0{self._bytes * 4}b")
         bin_total = "".join(["0b", bin1, bin2])
         return f'0x{format(int(bin_total, 2), f"0{self._bytes * 2}x")}'
 
-    def write(self, data, addr) -> bool:
+    def write(self, data: str, addr: str) -> bool:
+        """
+        Writes `data` to register `addr`.
+
+        Parameters
+        ----------
+        data : `str`
+        addr : `str`
+        """
         return self._registers.get(str(addr).upper()).__call__(data)
 
-    def write_pair(self, data) -> bool:
+    def write_pair(self, data: str) -> bool:
+        """
+        Writes the data to the register pair.
+
+        Parameters
+        ----------
+        data : str
+        """
         mem_size = 8
         binary_data = format(int(str(data), self._base), f"0{self._bytes*8}b")
         data_1, data_2 = [
@@ -190,9 +279,18 @@ class RegisterPair:
         self._registers.get(str(self._reg_2).upper()).__call__(data_2)
         return True
 
+    pass
+
 
 class StackPointer(Byte):
-    def __init__(self, memory, *args, **kwargs) -> None:
+    def __init__(self, memory: Memory, *args, **kwargs) -> None:
+        """
+        Implements the functionality of StackPointer
+
+        Parameters
+        ----------
+        memory : `Memory`
+        """
         super().__init__(*args, **kwargs)
         self.memory = memory
 
@@ -226,6 +324,8 @@ class StackPointer(Byte):
     def read(self, *args, **kwargs) -> Byte:
         """
         POP rp
+
+        Method to return and pop the 16-bit data
         """
         bin1 = format(int(str(self.memory[self.__add__(1)]), self._base), f"0{8}b")  # single byte
         bin2 = format(int(str(self.memory[self.__add__(1)]), self._base), f"0{8}b")  # single byte
@@ -236,6 +336,8 @@ class StackPointer(Byte):
         """
         PUSH rp
         rp = BC, DE, HL, or PSW
+
+        Method to push and write the 16-bit data
         """
         mem_size = 8
         binary_data = format(int(str(data), self._base), f"0{self._bytes*8}b")
@@ -251,12 +353,28 @@ class StackPointer(Byte):
 
 
 class ProgramCounter(Byte):
-    def __init__(self, memory, _bytes=2, *args, **kwargs) -> None:
+    def __init__(self, memory: Memory, _bytes: int = 2, *args, **kwargs) -> None:
+        """
+        Implements the functinality of Program Counter.
+
+        Parameters
+        ----------
+        memory : `Memory`
+        _bytes : `int`, optional
+            Defaults to 2
+        """
         super().__init__(_bytes=2, *args, **kwargs)
         self.memory = memory
         return
 
-    def write(self, data):
+    def write(self, data: str):
+        """
+        Method to update the value of the program counter
+
+        Parameters
+        ----------
+        data : `str`
+        """
         self.memory[self._data] = data
         self.__next__()
         return True
@@ -264,6 +382,9 @@ class ProgramCounter(Byte):
 
 class SuperMemory:
     def __init__(self) -> None:
+        """
+        Implements and manage `Memory`, `RegisterPair`, `StackPointer` and `ProgramCounter`.
+        """
         self.memory = Memory(65535, "0x0000")
 
         self.A = Byte()
@@ -281,7 +402,8 @@ class SuperMemory:
     def M(self):
         return
 
-    def _reg_inspect(self):
+    def _reg_inspect(self) -> str:
+        """Returns the register pairs into a str"""
         return textwrap.dedent(
             f"""
             Registers
@@ -295,7 +417,8 @@ class SuperMemory:
             """
         )
 
-    def _registers_todict(self):
+    def _registers_todict(self) -> dict:
+        """Returns the register pairs into a dictionary"""
         return {
             "A/PSW": f"{self.A} {self.PSW}",
             "BC": f"{self.BC}",
@@ -305,7 +428,8 @@ class SuperMemory:
             "PC": f"{self.PC}",
         }
 
-    def inspect(self):
+    def inspect(self) -> str:
+        """Method to inspect the register pairs and memory"""
         return "\n\n".join([self._reg_inspect(), str(self.memory.sort())])
 
     pass
