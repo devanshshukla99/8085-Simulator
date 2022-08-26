@@ -17,7 +17,7 @@ class Operations:
         self.super_memory.PC("0x0800")
         self._registers_list = {
             "A": self.super_memory.A,
-            "PSW": self.super_memory.PSW,
+            "PSW": self.flags.PSW,
             "B": self.super_memory.BC,
             "C": self.super_memory.BC,
             "D": self.super_memory.DE,

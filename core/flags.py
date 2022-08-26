@@ -1,6 +1,6 @@
 import textwrap
 
-from core.memory import Hex
+from core.basic_memory import Hex
 
 
 class JumpFlag:
@@ -122,6 +122,23 @@ class Flags:
             S = {self.S}
             """
         )
+
+    @property
+    def PSW(self):
+        _psw_binary = ""
+        for _, value in self._flags.items():
+            _psw_binary += format(value, "0b")
+        print(f"bin={_psw_binary}")
+        return format(int(_psw_binary, 2), "#04x")
+
+    @PSW.setter
+    def PSW(self, val):
+        print(f"settings psw {val}")
+        _psw_binary = format(int(val, 16), "08b")
+        print(f"bin={_psw_binary}")
+        for i, keys in enumerate(self._flags.keys()):
+            self._flags[keys] = _psw_binary[7 - i]
+        return True
 
     CY = property(fget=lambda self: self._flags.get("CY"), fset=lambda self, val: self._flags.__setitem__("CY", val))
     P = property(fget=lambda self: self._flags.get("P"), fset=lambda self, val: self._flags.__setitem__("P", val))
