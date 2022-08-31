@@ -40,7 +40,7 @@ class Instructions:
             return
 
         if not add:
-            flags.C = False
+            flags.CY = False
             if int(str(data_1), 16) < int(str(og2), 16):
                 print("CARRY FLAG-")
                 flags.CY = True
@@ -443,9 +443,7 @@ class Instructions:
         for i in range(0, len(data_bin[:-1])):
             rolled_data_bin.append(data_bin[i + 1])
 
-        # CY into new LSB
         rolled_data_bin.insert(8, str(int(data_bin[0])))
-        # MSB into CY
         flags.CY = bool(int(data_bin[0]))
 
         rolled_data_bin = "".join(rolled_data_bin)
