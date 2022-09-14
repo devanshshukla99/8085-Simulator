@@ -1,0 +1,14 @@
+{
+    "description": "Python based webapp for 8085-Simulator", 
+    "license": "MIT License",
+    "title": "8085-Simulator", 
+    "upload_type": "software",
+    "creators": [
+        {
+            "orcid": "0000-0003-0610-9747",
+            "affiliation": "Sardar Vallabhbhai National Institute of Technology Surat, India",
+            "name": "Shukla, Devansh"
+        }
+    ],
+    "access_right": "open"
+}
