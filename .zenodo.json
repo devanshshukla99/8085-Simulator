@@ -1,6 +1,6 @@
 {
     "description": "Python based webapp for 8085-Simulator", 
-    "license": "MIT License",
+    "license": "MIT",
     "title": "8085-Simulator", 
     "upload_type": "software",
     "creators": [
